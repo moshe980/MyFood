@@ -1,0 +1,50 @@
+<resources>
+    <string name="app_name">My Food</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="search_recipe_title">חפש מתכון</string>
+    <string name="search_your_recipe">איזה מתכון תרצה לחפש?</string>
+    <string name="chorus_recipe">
+        1. מכינים את הבצק: אל סיר קטן יוצקים מים, מסיפים מלח וכף שמן. מביאים לרתיחה.
+
+2. מסירים את הסיר מהאש, מוסיפים את הקמח ומערבבים עד לקבלת בצק חלק. אם מתקשים להגיע למרקם חלק, יש ללוש את הבצק על משטח משומן עד שמתקבל בצק חלק ואחיד. לא ללוש את הצק יתר על המידה.
+
+3. מעבירים את הבצק אל שק זילוף מבד או שני שקי זילוף מניילון ומחברים צנתר רחב משונן. מניחים בצד.
+
+4. מכינים את הציפוי: בצלחת מערבבים סוכר וקינמון.
+
+5. מכינים את רוטב השוקולד: קוצים את השוקולד לחתיכות קטנות ומביאים לקערה חסינת חום. בסיר קטן מביאים את השמנת לסף רתיחה. יוצקים את השמנת על גבי השוקולד, נותנים לעמוד כ2 דקות. מערבבים עד שהשקולד נמס ומקבלים תערובת חלקה.
+6. מחממים את השמן ל180 מעלות. מזלים רצועות בצק בארוך של כ8-10 ס"מ. מטדנים 5-6 צ'ורוס מכל פעם. מטגנים במשך כ3-4 דקות, עד להזהבה.
+7. מעבירים לנייר סופג ואחר כך מגלגלים בתערובת הסוכר והקינמון.
+8. מגישים חם עם רוטב שוקולד. </string>
+    <string name="chorus_ingredients">לבצק:
+    1. קמח 125 גרם
+    2.מים 240 מ"ל
+    3.מלח חצי כפית
+    שמן קנולה כף
+    לרוטב שוקולד:
+    4. שוקולד מריר 100 גרם
+    5. שמנת מתוקה 120 מ"ל
+    לציפוי:
+    6. סוכר רבע כוס
+    7. קינמון כפית</string>
+    <string-array name="categories">
+
+        <item>גבינה לבנה</item>
+        <item>ספגטי</item>
+        <item>חלב</item>
+        <item>סוכר</item>
+
+    </string-array>
+    <string-array name="units">
+
+        <item>קילו</item>
+        <item>גרם</item>
+        <item>יחידות</item>
+        <item>ליטר</item>
+
+    </string-array>
+
+
+</resources>
