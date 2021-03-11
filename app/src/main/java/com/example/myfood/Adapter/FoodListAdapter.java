@@ -28,17 +28,17 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.FoodLi
     }
 
     public static class FoodListViewHolder extends RecyclerView.ViewHolder {
-        public ImageView foodImage;
         public TextView foodDiscription;
         public TextView amount;
+        public ImageView avilableItem;
         public TextView unit;
 
         public FoodListViewHolder(@NonNull View itemView, final OnItemClickListener listener) {
             super(itemView);
             foodDiscription = itemView.findViewById(R.id.foodDiscriptionTV);
             amount = itemView.findViewById(R.id.amountTV);
+            avilableItem = itemView.findViewById(R.id.avilableItem);
             unit = itemView.findViewById(R.id.unitTV);
-            foodImage = itemView.findViewById(R.id.food_image);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -72,14 +72,16 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.FoodLi
     public void onBindViewHolder(@NonNull FoodListViewHolder holder, int position) {
         FoodItem currentFoodItem = foodList.get(position);
 
-        holder.foodDiscription.setText(currentFoodItem.getFoodDiscription());
+        holder.foodDiscription.setText(currentFoodItem.getFoodDescription());
         holder.amount.setText(String.valueOf(currentFoodItem.getAmount()));
-        holder.unit.setText(currentFoodItem.getUnit());
+        if (currentFoodItem.getUnit() != null) {
+            holder.unit.setText(currentFoodItem.getUnit());
+        }
         Picasso.get()
-                .load(currentFoodItem.getUrl())
+                .load(currentFoodItem.getAvailable())
                 .fit()
                 .centerCrop()
-                .into(holder.foodImage);
+                .into(holder.avilableItem);
 
     }
 

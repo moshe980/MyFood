@@ -17,6 +17,7 @@
         android:weightSum="3">
 
         <androidx.cardview.widget.CardView
+            android:id="@+id/meat_category"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
@@ -52,6 +53,7 @@
         </androidx.cardview.widget.CardView>
 
         <androidx.cardview.widget.CardView
+            android:id="@+id/chicken_category"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
@@ -87,6 +89,7 @@
         </androidx.cardview.widget.CardView>
 
         <androidx.cardview.widget.CardView
+            android:id="@+id/sideDishe_category"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
@@ -130,6 +133,7 @@
         android:weightSum="3">
 
         <androidx.cardview.widget.CardView
+            android:id="@+id/pasta_category"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
@@ -164,6 +168,7 @@
         </androidx.cardview.widget.CardView>
 
         <androidx.cardview.widget.CardView
+            android:id="@+id/breakfast_category"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
@@ -243,6 +248,7 @@
         android:weightSum="3">
 
         <androidx.cardview.widget.CardView
+            android:id="@+id/starters_category"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
@@ -277,6 +283,7 @@
         </androidx.cardview.widget.CardView>
 
         <androidx.cardview.widget.CardView
+            android:id="@+id/vegetarian_category"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
@@ -312,6 +319,7 @@
         </androidx.cardview.widget.CardView>
 
         <androidx.cardview.widget.CardView
+            android:id="@+id/vegan_category"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"

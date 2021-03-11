@@ -15,6 +15,12 @@
         android:textSize="30dp"
         android:textStyle="bold" />
 
+    <ImageView
+        android:id="@+id/cartoon_empty_fridge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/cartoon_empty_fridge"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/food_stock_recyclerView"
         android:layout_width="match_parent"

@@ -6,6 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,62 +16,93 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myfood.Activity.Login;
+import com.example.myfood.Activity.ManageFood;
 import com.example.myfood.Activity.Popup.AddFoodList;
 import com.example.myfood.Activity.Popup.EditFoodList;
+import com.example.myfood.Adapter.BarcodeListAdapter;
+import com.example.myfood.Class.Family;
 import com.example.myfood.Class.FoodItem;
 import com.example.myfood.Adapter.FoodListAdapter;
+import com.example.myfood.Class.User;
 import com.example.myfood.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
-public class FoodStock extends Fragment  {
+public class FoodStock extends Fragment {
 
-    public static ArrayList<FoodItem> foodList;
     private RecyclerView mRecyclerView;
     public static FoodListAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private Button addBtn;
+    private FirebaseDatabase database = FirebaseDatabase.getInstance();
+    private DatabaseReference myRef;
+    private ImageView emptyFridge;
+
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_food_stock, container, false);
 
-        addBtn=view.findViewById(R.id.add_food_item);
-
-        foodList = new ArrayList<>();
-        if(Integer.parseInt(Login.birthDayET.getText().toString())<=20){
-            foodList.add(new FoodItem("חמאה", 200, "גרם","https://dairyfarmersofcanada.ca/sites/default/files/product_butter_thumb.jpg"));
-            foodList.add(new FoodItem("קמח", 2, "קילוגרם","https://www.apk-inform.com/uploads/Redakciya/2019/%D0%98%D1%8E%D0%BD%D1%8C/%D0%BC%D1%83%D0%BA%D0%B0.jpg"));
-            foodList.add(new FoodItem("ביצים", 12, "יחידות","https://chriskresser.com/wp-content/uploads/iStock-172696992.jpg"));
-
-        }else {
-            foodList.add(new FoodItem("חמאה", 200, "גרם"));
-            foodList.add(new FoodItem("קמח", 2, "קילוגרם"));
-            foodList.add(new FoodItem("ביצים", 12, "יחידות"));
-        }
+        addBtn = view.findViewById(R.id.add_food_item);
+        emptyFridge = view.findViewById(R.id.cartoon_empty_fridge);
         mRecyclerView = view.findViewById(R.id.food_stock_recyclerView);
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(getContext());
-        mAdapter = new FoodListAdapter(foodList);
+        emptyFridge.setVisibility(view.GONE);
 
-        mRecyclerView.setLayoutManager(mLayoutManager);
-        mRecyclerView.setAdapter(mAdapter);
-
-
-        mAdapter.setOnItemClickListener(new FoodListAdapter.OnItemClickListener() {
+        myRef = database.getReference("families").child(User.getInstance().getFamilyCode());
+        myRef.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onItemClick(int position) {
-                Intent intent=new Intent(getContext(), EditFoodList.class);
-                intent.putExtra("foodItem",foodList.get(position));
-                startActivity(intent);
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Family.getInstance().getFoodList().clear();
+                for (DataSnapshot keyNode : snapshot.child("foodStock").getChildren()) {
+                    FoodItem foodItem = keyNode.getValue(FoodItem.class);
+                    Family.getInstance().getFoodList().add(foodItem);
+                }
+
+                mAdapter = new FoodListAdapter( Family.getInstance().getFoodList());
+                if (Family.getInstance().getFoodList().size() > 0) {
+                    emptyFridge.setVisibility(view.GONE);
+                    mRecyclerView.setAdapter(mAdapter);
+                    mAdapter.setOnItemClickListener(new FoodListAdapter.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(int position) {
+                            Intent intent = new Intent(getContext(), EditFoodList.class);
+                            intent.putExtra("foodItem", Family.getInstance().getFoodList().get(position));
+                            intent.putExtra("Class", "FoodStock");
+                            startActivity(intent);
+                        }
+                    });
+                } else {
+                    emptyFridge.setVisibility(view.VISIBLE);
+
+                }
+                mRecyclerView.setLayoutManager(mLayoutManager);
+
+            }
+
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
             }
         });
+
 
         addBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(getContext(), AddFoodList.class);
+                Intent intent = new Intent(getContext(), AddFoodList.class);
+                intent.putExtra("Class", "FoodStock");
                 startActivity(intent);
 
             }
@@ -80,7 +113,6 @@ public class FoodStock extends Fragment  {
 
 
     }
-
 
 
 }

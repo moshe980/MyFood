@@ -11,38 +11,45 @@
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1
-"
+        android:layout_weight="1"
         android:layout_gravity="right"
         android:src="@drawable/myfood_logo" />
 
     <TextView
+        android:id="@+id/nameSlide"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="right"
         android:paddingTop="8dp"
         android:textColor="#000000"
+        android:textSize="15dp"
         android:text="שם"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     <TextView
+        android:id="@+id/familiyCodeSlide"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="#000000"
+        android:textSize="15dp"
         android:layout_gravity="right"
         android:text="משפחה" />
 
     <TextView
+        android:id="@+id/userScore"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="right"
         android:textColor="#000000"
+        android:textSize="15dp"
         android:text="ניקוד שצברתי" />
 
     <TextView
+        android:id="@+id/familyScore"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="right"
+        android:textSize="15dp"
         android:textColor="#000000"
         android:text="ניקוד קבוצתי" />
 

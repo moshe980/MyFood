@@ -18,10 +18,23 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import com.example.myfood.Activity.Login;
+import com.example.myfood.Activity.ManageFood;
+import com.example.myfood.Class.Family;
 import com.example.myfood.Class.FoodItem;
+import com.example.myfood.Class.User;
 import com.example.myfood.Fragment.FoodStock;
+import com.example.myfood.Fragment.ShoppingList;
 import com.example.myfood.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 public class AddFoodList extends Activity implements AdapterView.OnItemSelectedListener {
@@ -29,10 +42,13 @@ public class AddFoodList extends Activity implements AdapterView.OnItemSelectedL
     private int heigh;
     private NumberPicker addNumberPicker;
     private Button addBtn;
-    private Spinner categorySpinner, unitsSpiner;
-    private String currentCategory, currentUnit;
-    private ImageView foodImage;
-    private Context context;
+    private Spinner categorySpinner;
+    private Spinner unitSpinner;
+    private String currentCategory;
+    private String currentUnit;
+    private FirebaseDatabase database = FirebaseDatabase.getInstance();
+    private DatabaseReference myRef;
+    private String currentClass;
 
 
     @Override
@@ -42,15 +58,17 @@ public class AddFoodList extends Activity implements AdapterView.OnItemSelectedL
             getWindow().getDecorView().setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         }
         setContentView(R.layout.activity_add_food_list);
-        context = this;
+        Intent intent = getIntent();
+        currentClass = (String) intent.getExtras().getSerializable("Class");
+
         categorySpinner = findViewById(R.id.category_spinner);
-        unitsSpiner = findViewById(R.id.units_spinner);
+        unitSpinner = findViewById(R.id.unit_spinner);
         addNumberPicker = findViewById(R.id.add_numberPicker);
         addBtn = findViewById(R.id.add_food_item);
-        foodImage = findViewById(R.id.food_image_add);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-        addNumberPicker.setMinValue(0);
-        addNumberPicker.setMaxValue(1000);
+        addNumberPicker.setMinValue(1);
+        addNumberPicker.setMaxValue(100);
 
 
         ArrayAdapter<CharSequence> categoryAdapter = ArrayAdapter.createFromResource(this, R.array.categories, android.R.layout.simple_spinner_item);
@@ -60,24 +78,29 @@ public class AddFoodList extends Activity implements AdapterView.OnItemSelectedL
 
         ArrayAdapter<CharSequence> unitsAdapter = ArrayAdapter.createFromResource(this, R.array.units, android.R.layout.simple_spinner_item);
         unitsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        unitsSpiner.setAdapter(unitsAdapter);
-        unitsSpiner.setOnItemSelectedListener(this);
-
+        unitSpinner.setAdapter(unitsAdapter);
+        unitSpinner.setOnItemSelectedListener(this);
 
         addBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FoodItem foodItem = new FoodItem(currentCategory, addNumberPicker.getValue(), currentUnit);
-                FoodStock.foodList.add(foodItem);
-                finish();
-                FoodStock.mAdapter.notifyDataSetChanged();
-
-                Toast.makeText(context, "המוצר נוסף בהצלחה", Toast.LENGTH_SHORT).show();
+                if (currentClass.equals("ShoppingList")) {
+                    myRef = database.getReference("families").child(User.getInstance().getFamilyCode()).child("shoppingList");
+                    Family.getInstance().getShoppingList().add(new FoodItem(null, currentCategory, addNumberPicker.getValue(), currentUnit, null));
+                    myRef.setValue(Family.getInstance().getShoppingList());
+                    ShoppingList.mAdapter.notifyDataSetChanged();
+                    finish();
+                } else {
+                    myRef = database.getReference("families").child(User.getInstance().getFamilyCode()).child("foodStock");
+                    Family.getInstance().getFoodList().add(new FoodItem(null, currentCategory, addNumberPicker.getValue(), currentUnit, null));
+                    myRef.setValue(Family.getInstance().getFoodList());
+                    FoodStock.mAdapter.notifyDataSetChanged();
+                    finish();
+                }
 
 
             }
         });
-
 
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
@@ -85,7 +108,7 @@ public class AddFoodList extends Activity implements AdapterView.OnItemSelectedL
         width = dm.widthPixels;
         heigh = dm.heightPixels;
 
-        getWindow().setLayout((int) (width * .6), (int) (heigh * .5));
+        getWindow().setLayout((int) (width * .8), (int) (heigh * .4));
 
 
         WindowManager.LayoutParams params = getWindow().getAttributes();
@@ -103,43 +126,9 @@ public class AddFoodList extends Activity implements AdapterView.OnItemSelectedL
         switch (parent.getId()) {
             case R.id.category_spinner:
                 currentCategory = parent.getItemAtPosition(position).toString();
-                if (Integer.parseInt(Login.birthDayET.getText().toString()) <= 20) {
-                    switch (parent.getItemAtPosition(position).toString()) {
-                        case "גבינה לבנה":
-                            Picasso.get()
-                                    .load("https://hameshek.co.il/wp-content/uploads/2019/07/7290002824183-600x600.jpg")
-                                    .fit()
-                                    .centerCrop()
-                                    .into(foodImage);
-                            break;
-                        case "חלב":
-                            Picasso.get()
-                                    .load("https://www.offisal.co.il/wp-content/uploads/2017/11/5a13cb221b43705b84a7d136029d184701f13a1c.jpg")
-                                    .fit()
-                                    .centerCrop()
-                                    .into(foodImage);
-                            break;
-                        case "סוכר":
-                            Picasso.get()
-                                    .load("https://images.theconversation.com/files/307440/original/file-20191217-58292-nlmvmh.jpg?ixlib=rb-1.1.0&q=45&auto=format&w=926&fit=clip")
-                                    .fit()
-                                    .centerCrop()
-                                    .into(foodImage);
-                            break;
-                        case "ספגטי":
-                            Picasso.get()
-                                    .load("https://previews.123rf.com/images/pavlok/pavlok1804/pavlok180400192/100084317-stack-of-raw-spaghetti-isolated-on-white-background.jpg")
-                                    .fit()
-                                    .centerCrop()
-                                    .into(foodImage);
-                            break;
-                    }
-
-                }
                 break;
-            case R.id.units_spinner:
+            case R.id.unit_spinner:
                 currentUnit = parent.getItemAtPosition(position).toString();
-                break;
         }
     }
 
