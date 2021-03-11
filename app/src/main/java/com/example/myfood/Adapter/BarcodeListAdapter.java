@@ -73,7 +73,7 @@ public class BarcodeListAdapter extends RecyclerView.Adapter<BarcodeListAdapter.
 
         holder.barcodeTV.setText(currentFoodItem.getBarcode());
         holder.barcodeDiscriptionTV.setText(currentFoodItem.getFoodDescription());
-        holder.amountTV.setText(String.valueOf(currentFoodItem.getAmount()));
+        holder.amountTV.setText(fmt(currentFoodItem.getAmount()));
         if (currentFoodItem.getUnit() != null) {
             holder.unitTV.setText(String.valueOf(currentFoodItem.getUnit()));
 
@@ -86,5 +86,13 @@ public class BarcodeListAdapter extends RecyclerView.Adapter<BarcodeListAdapter.
     @Override
     public int getItemCount() {
         return barcodeList.size();
+    }
+
+    public  String fmt(double d)
+    {
+        if(d == (long) d)
+            return String.format("%d",(long)d);
+        else
+            return String.format("%s",d);
     }
 }

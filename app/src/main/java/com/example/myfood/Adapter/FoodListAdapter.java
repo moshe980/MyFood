@@ -73,7 +73,7 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.FoodLi
         FoodItem currentFoodItem = foodList.get(position);
 
         holder.foodDiscription.setText(currentFoodItem.getFoodDescription());
-        holder.amount.setText(String.valueOf(currentFoodItem.getAmount()));
+        holder.amount.setText(fmt(currentFoodItem.getAmount()));
         if (currentFoodItem.getUnit() != null) {
             holder.unit.setText(currentFoodItem.getUnit());
         }
@@ -89,4 +89,12 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.FoodLi
     public int getItemCount() {
         return foodList.size();
     }
+
+    public String fmt(double d) {
+        if (d == (long) d)
+            return String.format("%d", (long) d);
+        else
+            return String.format("%s", d);
+    }
 }
+

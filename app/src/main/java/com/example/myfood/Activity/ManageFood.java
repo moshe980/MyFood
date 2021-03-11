@@ -303,29 +303,33 @@ public class ManageFood extends AppCompatActivity implements BottomNavigationVie
                             myRef.addValueEventListener(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    boolean flag = false;
-                                    ArrayList<FoodItem> tmp=new ArrayList<FoodItem>(barcodes);
+                                    ArrayList<FoodItem> tmp = new ArrayList<FoodItem>(barcodes);
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 
-                                    for (FoodItem barcode:tmp) {
-                                        for (DataSnapshot keyNode : snapshot.getChildren()) {
-                                            if (keyNode.child("barcode").getValue().equals(barcode.getBarcode())) {
-                                                barcode.setFoodDescription(String.valueOf(keyNode.child("product_name").getValue()));
-                                                barcode.setCategory(String.valueOf(keyNode.child("category").getValue()));
-                                                barcode.setUnit(String.valueOf(keyNode.child("unit").getValue()));
-                                                int amount = Integer.parseInt(String.valueOf(keyNode.child("amount").getValue()));
-                                                double weight = Double.parseDouble(String.valueOf(keyNode.child("weight").getValue()));
-                                                barcode.setAmount(amount * weight);
-                                                flag = true;
-                                                break;
+                                        tmp.parallelStream().forEach(barcode->{
+                                            boolean flag = false;
+
+                                            for (DataSnapshot keyNode : snapshot.getChildren()) {
+                                                if (keyNode.child("barcode").getValue().equals(barcode.getBarcode())) {
+                                                    barcode.setFoodDescription(String.valueOf(keyNode.child("product_name").getValue()));
+                                                    barcode.setCategory(String.valueOf(keyNode.child("category").getValue()));
+                                                    barcode.setUnit(String.valueOf(keyNode.child("unit").getValue()));
+                                                    int amount = Integer.parseInt(String.valueOf(keyNode.child("amount").getValue()));
+                                                    double weight = Double.parseDouble(String.valueOf(keyNode.child("weight").getValue()));
+                                                    barcode.setAmount(amount * weight);
+                                                    flag = true;
+                                                    break;
+
+                                                }
 
                                             }
+                                            if (!flag) {
+                                                unidentified_barcodes.add(barcode);
+                                                barcodes.remove(barcode);
+                                            }
+                                            flag = false;
 
-                                        }
-                                        if (!flag) {
-                                            unidentified_barcodes.add(barcode);
-                                            barcodes.remove(barcode);
-                                        }
-                                        flag = false;
+                                        });
                                     }
 
                                     if (barcodes.size() != 0) {
@@ -353,11 +357,11 @@ public class ManageFood extends AppCompatActivity implements BottomNavigationVie
                                         @Override
                                         public void onItemClick(int position) {
                                             Intent intent = new Intent(context, EditFoodList.class);
-                                            if(barcodes.size()>0){
+                                            if (barcodes.size() > 0) {
                                                 intent.putExtra("barcodeItem", barcodes.get(position));
                                                 intent.putExtra("Class", "Scan");
                                                 startActivity(intent);
-                                            }else if(unidentified_barcodes.size()>0){
+                                            } else if (unidentified_barcodes.size() > 0) {
 
                                             }
 
@@ -378,14 +382,12 @@ public class ManageFood extends AppCompatActivity implements BottomNavigationVie
                         }
                     });
                     //6. if task is failure
-                    task.addOnFailureListener(new
-
-                                                      OnFailureListener() {
-                                                          @Override
-                                                          public void onFailure(@NonNull Exception e) {
-                                                              Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-                                                          }
-                                                      });
+                    task.addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    });
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
