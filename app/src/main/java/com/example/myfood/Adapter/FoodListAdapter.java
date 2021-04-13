@@ -77,11 +77,13 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.FoodLi
         if (currentFoodItem.getUnit() != null) {
             holder.unit.setText(currentFoodItem.getUnit());
         }
-        Picasso.get()
-                .load(currentFoodItem.getAvailable())
-                .fit()
-                .centerCrop()
-                .into(holder.avilableItem);
+        if (currentFoodItem.getAvailable() != 0) {
+            Picasso.get()
+                    .load(currentFoodItem.getAvailable())
+                    .fit()
+                    .centerCrop()
+                    .into(holder.avilableItem);
+        }
 
     }
 

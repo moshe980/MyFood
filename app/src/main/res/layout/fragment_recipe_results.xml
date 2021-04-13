@@ -30,15 +30,6 @@
                 android:layout_marginLeft="70dp"
                 android:layout_weight="1" />
 
-            <ImageButton
-                android:id="@+id/back_to_searchRecipe"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="#E53935"
-                android:src="@drawable/ic_arrow_back_black_24dp" />
-
-
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView

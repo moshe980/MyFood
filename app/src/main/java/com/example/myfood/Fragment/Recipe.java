@@ -2,11 +2,13 @@ package com.example.myfood.Fragment;
 
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -26,7 +28,9 @@ import com.example.myfood.Adapter.FoodListAdapter;
 import com.example.myfood.Class.Family;
 import com.example.myfood.Class.FoodItem;
 import com.example.myfood.Class.RecipeItem;
+import com.example.myfood.Class.RightJustifyAlertDialog;
 import com.example.myfood.R;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -37,7 +41,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 import static com.example.myfood.Activity.Login.CHANNEL_1_ID;
 
@@ -58,6 +61,7 @@ public class Recipe extends Fragment {
     private DatabaseReference myRef;
     private boolean flag = false;
     private NotificationManagerCompat notificationManager;
+    private String dialogResult;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -66,7 +70,6 @@ public class Recipe extends Fragment {
         chosenRecipe = (RecipeItem) getArguments().getSerializable("chosenRecipe");
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-        ImageButton backBtn = view.findViewById(R.id.back_to_searchRecipe);
         add_to_shopping_listBtn = view.findViewById(R.id.add_to_shopping_list);
         complite_recipeBtn = view.findViewById(R.id.complite_recipe);
         movieBtn = view.findViewById(R.id.recipe_movieBtn);
@@ -77,7 +80,7 @@ public class Recipe extends Fragment {
         recipeName = view.findViewById(R.id.recipeName);
 
         notificationManager = NotificationManagerCompat.from(getContext());
-        sendChannel1(view);
+        //  sendChannel1(view);
 
         Picasso.get()
                 .load(chosenRecipe.getImageUrl())
@@ -95,23 +98,46 @@ public class Recipe extends Fragment {
         ArrayList<FoodItem> ingredientsList = new ArrayList<>();
         ArrayList<FoodItem> unIngredientsList = new ArrayList<>();
 
-        for (Map<String, Object> map : chosenRecipe.getIngredients()) {
-            FoodItem foodItem = new FoodItem(null, (String) map.get("שם"), Double.parseDouble((String) map.get("כמות")), (String) map.get("יחידה"), null);
-            for (int i = 0; i < Family.getInstance().getFoodList().size(); i++) {
-                if (Family.getInstance().getFoodList().get(i).getFoodDescription().contains(foodItem.getFoodDescription())) {
+        chosenRecipe.getIngredients().parallelStream().forEach(ingredient -> {
+            FoodItem recipeItem = new FoodItem(null, (String) ingredient.get("שם"), Double.parseDouble((String) ingredient.get("כמות")),
+                    (String) ingredient.get("יחידה"), null);
+            recipeItem.setAlternativeList((ArrayList<String>) ingredient.get("תחליפיים"));
+            Family.getInstance().getFoodList().parallelStream().forEach(currentFoodItem -> {
+                if (currentFoodItem.getFoodDescription().contains(recipeItem.getFoodDescription()) &&
+                        currentFoodItem.getAmount() * currentFoodItem.convertAmount() >= recipeItem.getAmount() * recipeItem.convertAmount()) {
                     flag = true;
                 }
-            }
+            });
             if (flag) {
-                foodItem.setAvailable("https://www.sh100.co.il/wp-content/uploads/2018/09/fa-check_125_150_007f02_none-425x400-e1538466694132.png");
+                recipeItem.setAvailable(R.drawable.green_v);
 
             } else {
-                foodItem.setAvailable("https://upload.wikimedia.org/wikipedia/commons/f/f1/Heavy_red_%22x%22.png");
-                unIngredientsList.add(foodItem);
+                if (recipeItem.getAlternativeList() == null) {
+                    recipeItem.setAvailable(R.drawable.red_x);
+                } else {
+                    for (String alternative : recipeItem.getAlternativeList()) {
+                        Family.getInstance().getFoodList().parallelStream().forEach(currentFoodItem -> {
+                            if (currentFoodItem.getFoodDescription().contains(alternative) &&
+                                    currentFoodItem.getAmount() * currentFoodItem.convertAmount() >= recipeItem.getAmount() * recipeItem.convertAmount()) {
+                                flag = true;
+                            }
+                        });
+                        if (flag) {
+                            recipeItem.setAvailable(R.drawable.yellow);
+
+                        } else {
+                            recipeItem.setAvailable(R.drawable.red_x);
+
+                        }
+                    }
+                }
+                unIngredientsList.add(recipeItem);
+
             }
-            ingredientsList.add(foodItem);
+            ingredientsList.add(recipeItem);
             flag = false;
-        }
+        });
+
 
         if (unIngredientsList.size() > 0) {
             complite_recipeBtn.setVisibility(View.INVISIBLE);
@@ -138,15 +164,59 @@ public class Recipe extends Fragment {
                 startActivity(intent);
             }
         });
-        backBtn.setOnClickListener(new View.OnClickListener() {
+        mAdapter.setOnItemClickListener(new FoodListAdapter.OnItemClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onItemClick(int position) {
+                if (ingredientsList.get(position).getAlternativeList() != null) {
+                    int checkedItem = -1;
 
-                getFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, new SearchRecipe()).commit();
 
+                    //missing ingredient
+                    MaterialAlertDialogBuilder builder = new RightJustifyAlertDialog(getActivity());
+                    builder.setTitle("מצרכים חלופיים")
+                            .setPositiveButton("אישור", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    flag = false;
+                                    String oldIngredient = ingredientsList.get(position).getFoodDescription();
+                                    ingredientsList.get(position).setFoodDescription(dialogResult);
+                                    ingredientsList.get(position).getAlternativeList().add(oldIngredient);
+                                    ingredientsList.get(position).getAlternativeList().remove(ingredientsList.get(position).getAlternativeList().indexOf(dialogResult));
+                                    Family.getInstance().getFoodList().parallelStream().forEach(currentFoodItem -> {
+                                        if (currentFoodItem.getFoodDescription().contains(dialogResult) &&
+                                                currentFoodItem.getAmount() * currentFoodItem.convertAmount() >= ingredientsList.get(position).getAmount() * ingredientsList.get(position).convertAmount()) {
+                                            flag = true;
+                                        }
+                                    });
+                                    if (flag) {
+                                        ingredientsList.get(position).setAvailable(R.drawable.green_v);
+                                        unIngredientsList.remove(ingredientsList.get(position));
+
+
+                                    } else {
+                                        ingredientsList.get(position).setAvailable(R.drawable.red_x);
+
+                                    }
+                                    mRecyclerView.setAdapter(mAdapter);
+
+
+                                }
+                            });
+                    builder.setNegativeButton("ביטול", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+
+                        }
+                    });
+                    builder.setSingleChoiceItems(new ArrayAdapter<String>(getActivity(), R.layout.rtl_list_item, R.id.text, ingredientsList.get(position).getAlternativeList()), checkedItem, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogResult = ingredientsList.get(position).getAlternativeList().get(i);
+                        }
+                    }).show();
+                }
             }
         });
-
         add_to_shopping_listBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -162,7 +232,7 @@ public class Recipe extends Fragment {
                                 String finalCurrentFamilyCode = currentFamilyCode;
                                 myRef = database.getReference("families").child(finalCurrentFamilyCode).child("shoppingList");
                                 for (int i = 0; i < unIngredientsList.size(); i++) {
-                                    unIngredientsList.get(i).setAvailable(null);
+                                    unIngredientsList.get(i).setAvailable(0);
                                 }
                                 myRef.setValue(unIngredientsList);
 

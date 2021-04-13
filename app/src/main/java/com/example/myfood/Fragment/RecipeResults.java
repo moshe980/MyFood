@@ -1,11 +1,11 @@
 package com.example.myfood.Fragment;
 
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
-import android.widget.ImageButton;
 import android.widget.Switch;
 
 import androidx.annotation.NonNull;
@@ -44,7 +44,6 @@ public class RecipeResults extends Fragment {
 
         aSwitch = view.findViewById(R.id.mySwitch);
         db = FirebaseFirestore.getInstance();
-        ImageButton backBtn = view.findViewById(R.id.back_to_searchRecipe);
         Bundle bundle = this.getArguments();
         if (bundle != null) {
             currentCategory = String.valueOf(bundle.getString("category"));
@@ -91,7 +90,7 @@ public class RecipeResults extends Fragment {
                         //set Fragmentclass Arguments
                         Recipe recipe = new Recipe();
                         recipe.setArguments(bundle);
-                        getFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipe).commit();
+                        getParentFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipe).commit();
                     }
                 });
             }
@@ -100,7 +99,7 @@ public class RecipeResults extends Fragment {
         aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked == true) {
+                if (isChecked) {
                     myRecipesList.clear();
                     db.collection("recipes").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                         @Override
@@ -156,7 +155,7 @@ public class RecipeResults extends Fragment {
                                     //set Fragmentclass Arguments
                                     Recipe recipe = new Recipe();
                                     recipe.setArguments(bundle);
-                                    getFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipe).commit();
+                                    getParentFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipe).commit();
                                 }
                             });
                         }
@@ -196,7 +195,7 @@ public class RecipeResults extends Fragment {
                                     //set Fragmentclass Arguments
                                     Recipe recipe = new Recipe();
                                     recipe.setArguments(bundle);
-                                    getFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipe).commit();
+                                    getParentFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipe).commit();
                                 }
                             });
                         }
@@ -205,18 +204,26 @@ public class RecipeResults extends Fragment {
             }
         });
 
-
-        backBtn.setOnClickListener(new View.OnClickListener() {
+        //On back press:
+        view.setFocusableInTouchMode(true);
+        view.requestFocus();
+        view.setOnKeyListener( new View.OnKeyListener()
+        {
             @Override
-            public void onClick(View v) {
-                getFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, new SearchRecipe()).commit();
-
+            public boolean onKey( View v, int keyCode, KeyEvent event )
+            {
+                if( keyCode == KeyEvent.KEYCODE_BACK )
+                {
+                    getParentFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, new SearchRecipe()).commit();
+                    return true;
+                }
+                return false;
             }
-        });
-
-
+        } );
         return view;
 
     }
+
+
 
 }

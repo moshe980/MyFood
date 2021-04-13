@@ -22,7 +22,7 @@ public class RecipeItem implements Serializable {
         this.instructions = instructions;
         this.ingredients = ingredients;
         this.difficultLevel = difficultLevel;
-        this.kashrot=kashrot;
+        this.kashrot = kashrot;
     }
 
     public RecipeItem() {

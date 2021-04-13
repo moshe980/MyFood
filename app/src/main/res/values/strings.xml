@@ -16,10 +16,11 @@
     </string-array>
     <string-array name="units">
 
-        <item>קילו</item>
+        <item>קילוגרם</item>
         <item>גרם</item>
         <item>יחידות</item>
         <item>ליטר</item>
+        <item>מ.ל</item>
 
     </string-array>
     <string-array name="recipes">
@@ -27,6 +28,7 @@
         <item>קרם ברולה</item>
         <item>שניצל</item>
         <item>עוגיות שוקולד ציפס</item>
+        <item>קראמבל תפוחים</item>
 
     </string-array>
 

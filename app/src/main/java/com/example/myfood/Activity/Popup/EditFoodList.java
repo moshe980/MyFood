@@ -8,11 +8,11 @@ import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.NumberPicker;
+import android.widget.Spinner;
 import android.widget.TextView;
-
-import androidx.annotation.NonNull;
 
 import com.example.myfood.Activity.ManageFood;
 import com.example.myfood.Class.Family;
@@ -24,11 +24,8 @@ import com.example.myfood.Fragment.ShoppingList;
 import com.example.myfood.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 public class EditFoodList extends Activity {
     private int width;
@@ -36,7 +33,7 @@ public class EditFoodList extends Activity {
     private FoodItem currentFoodItem;
     private FoodItem currentBarcodeItem;
     private FoodItem currentShoppingItem;
-
+    private Spinner edit_unit_spinner;
     private TextView food_nameTV, foodUnitTV;
     private NumberPicker numberPicker;
     private Button updateBtn;
@@ -60,14 +57,18 @@ public class EditFoodList extends Activity {
         currentShoppingItem = (FoodItem) intent.getExtras().getSerializable("shoppingFoodItem");
         currentClass = (String) intent.getExtras().getSerializable("Class");
 
-        numberPicker = findViewById(R.id.numberPicker);
+        numberPicker = findViewById(R.id.edit_numberPicker);
         food_nameTV = findViewById(R.id.food_name);
-        foodUnitTV = findViewById(R.id.unitPop);
+        edit_unit_spinner = findViewById(R.id.edit_unit_spinner);
         updateBtn = findViewById(R.id.update);
 
+        ArrayAdapter<CharSequence> unitsAdapter = ArrayAdapter.createFromResource(this, R.array.units, android.R.layout.simple_spinner_item);
+        unitsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        edit_unit_spinner.setAdapter(unitsAdapter);
+     //   edit_unit_spinner.setOnItemSelectedListener(this);
 
         numberPicker.setMinValue(0);
-        numberPicker.setMaxValue(100);
+        numberPicker.setMaxValue(1000);
         //show details about the chosen item:
         if (currentFoodItem != null) {
             food_nameTV.setText(currentFoodItem.getFoodDescription());

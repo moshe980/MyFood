@@ -1,10 +1,5 @@
 package com.example.myfood.Activity;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-
-import android.Manifest;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.NotificationChannel;
@@ -19,16 +14,19 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
-import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.myfood.Class.Family;
 import com.example.myfood.Class.User;
 import com.example.myfood.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -45,18 +43,13 @@ import java.util.Date;
 
 public class Login extends AppCompatActivity {
     public static final String CHANNEL_1_ID = "channel1";
-    private EditText emailET;
-    private EditText passwordlET;
-    private EditText firstNameET;
-    private EditText lastNameET;
+    private TextInputLayout emailET;
+    private TextInputLayout passwordET;
+    private TextInputLayout firstNameET;
+    private TextInputLayout lastNameET;
     public TextView birthDayEnter;
-    private TextView firstNameTV;
-    private TextView lastNameTV;
     private TextView birthDayTV;
-    private TextView emailTV;
-    private TextView passwordlTV;
-    private TextView familyCodeTV;
-    private EditText familyCodeET;
+    private TextInputLayout familyCodeET;
     private TextView creatAccountTV;
     private Button loginBtn;
     private Context context;
@@ -73,42 +66,33 @@ public class Login extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ActivityCompat.requestPermissions(this, new String[]{
+     /*   ActivityCompat.requestPermissions(this, new String[]{
                         Manifest.permission.WRITE_EXTERNAL_STORAGE
-                        , Manifest.permission.READ_EXTERNAL_STORAGE
-                        , Manifest.permission.READ_CONTACTS
-                        , Manifest.permission.INTERNET},
+                        , Manifest.permission.CAMERA
+                        , Manifest.permission.READ_EXTERNAL_STORAGE},
                 STORGE_PERMISSION_CODE);
-
+*/
         mAuth = FirebaseAuth.getInstance();
 
         context = this;
-        familyCodeTV = findViewById(R.id.familyCodeTV);
         familyCodeET = findViewById(R.id.familyCodeET);
-        emailTV = findViewById(R.id.emailTV);
-        emailET = findViewById(R.id.email);
-        passwordlTV = findViewById(R.id.passwordTV);
-        passwordlET = findViewById(R.id.password);
-        firstNameET = findViewById(R.id.firstName);
-        lastNameET = findViewById(R.id.lastName);
+        emailET = findViewById(R.id.emailET);
+        passwordET = findViewById(R.id.passwordET);
+        firstNameET = findViewById(R.id.firstNameET);
+        lastNameET = findViewById(R.id.lastNameET);
         birthDayEnter = findViewById(R.id.birthDayEnter);
-        firstNameTV = findViewById(R.id.firstNameTV);
-        lastNameTV = findViewById(R.id.lastNameTV);
         birthDayTV = findViewById(R.id.birthDayTV);
         creatAccountTV = findViewById(R.id.creatAccountTV);
         loginBtn = findViewById(R.id.login);
         progressBar = findViewById(R.id.progressBar);
 
         firstNameET.setVisibility(View.GONE);
-        firstNameTV.setVisibility(View.GONE);
 
         lastNameET.setVisibility(View.GONE);
-        lastNameTV.setVisibility(View.GONE);
 
         birthDayEnter.setVisibility(View.GONE);
         birthDayTV.setVisibility(View.GONE);
 
-        familyCodeTV.setVisibility(View.GONE);
         familyCodeET.setVisibility(View.GONE);
 
         creatNotificationChannels();
@@ -159,10 +143,7 @@ public class Login extends AppCompatActivity {
                 switch (creatAccountTV.getText().toString()) {
                     case "עדיין אין לך חשבון? תלחץ כאן!":
                         firstNameET.setVisibility(View.VISIBLE);
-                        firstNameTV.setVisibility(View.VISIBLE);
-
                         lastNameET.setVisibility(View.VISIBLE);
-                        lastNameTV.setVisibility(View.VISIBLE);
 
                         birthDayEnter.setVisibility(View.VISIBLE);
                         birthDayTV.setVisibility(View.VISIBLE);
@@ -172,10 +153,7 @@ public class Login extends AppCompatActivity {
                         break;
                     case "חזור":
                         firstNameET.setVisibility(View.GONE);
-                        firstNameTV.setVisibility(View.GONE);
-
                         lastNameET.setVisibility(View.GONE);
-                        lastNameTV.setVisibility(View.GONE);
 
                         birthDayEnter.setVisibility(View.GONE);
                         birthDayTV.setVisibility(View.GONE);
@@ -193,7 +171,8 @@ public class Login extends AppCompatActivity {
                 switch (loginBtn.getText().toString()) {
                     case "התחבר":
                         if (loginUiIsFull()) {
-                            mAuth.signInWithEmailAndPassword(emailET.getText().toString(), passwordlET.getText().toString())
+                            progressBar.setVisibility(View.VISIBLE);
+                            mAuth.signInWithEmailAndPassword(emailET.getEditText().getText().toString(), passwordET.getEditText().getText().toString())
                                     .addOnCompleteListener((Activity) context, new OnCompleteListener<AuthResult>() {
                                         @Override
                                         public void onComplete(@NonNull Task<AuthResult> task) {
@@ -213,11 +192,14 @@ public class Login extends AppCompatActivity {
                                                         Intent intent = new Intent(context, ManageFood.class);
                                                         startActivity(intent);
                                                         finish();
+                                                        progressBar.setVisibility(View.GONE);
+
 
                                                     }
 
                                                     @Override
                                                     public void onCancelled(@NonNull DatabaseError error) {
+                                                        progressBar.setVisibility(View.GONE);
 
                                                     }
                                                 });
@@ -227,6 +209,8 @@ public class Login extends AppCompatActivity {
                                                 Log.w("TAG", "signInWithEmail:failure", task.getException());
                                                 Toast.makeText(context, "האימייל או הסיסמא אינם נכונים",
                                                         Toast.LENGTH_SHORT).show();
+                                                progressBar.setVisibility(View.GONE);
+
                                             }
 
                                         }
@@ -236,27 +220,20 @@ public class Login extends AppCompatActivity {
                     case "הבא":
                         if (signUiIsFull()) {
                             emailET.setVisibility(View.GONE);
-                            emailTV.setVisibility(View.GONE);
-                            passwordlTV.setVisibility(View.GONE);
-                            passwordlET.setVisibility(View.GONE);
+                            passwordET.setVisibility(View.GONE);
                             firstNameET.setVisibility(View.GONE);
                             lastNameET.setVisibility(View.GONE);
                             birthDayEnter.setVisibility(View.GONE);
-                            firstNameTV.setVisibility(View.GONE);
-                            lastNameTV.setVisibility(View.GONE);
                             birthDayTV.setVisibility(View.GONE);
                             creatAccountTV.setVisibility(View.GONE);
-
                             familyCodeET.setVisibility(View.VISIBLE);
-                            familyCodeTV.setVisibility(View.VISIBLE);
-
                             loginBtn.setText("הירשם");
                         }
                         break;
                     case "הירשם":
                         if (familyCodeUiISFull()) {
                             progressBar.setVisibility(View.VISIBLE);
-                            mAuth.createUserWithEmailAndPassword(emailET.getText().toString(), passwordlET.getText().toString())
+                            mAuth.createUserWithEmailAndPassword(emailET.getEditText().getText().toString(), passwordET.getEditText().getText().toString())
                                     .addOnCompleteListener((Activity) context, new OnCompleteListener<AuthResult>() {
                                         @Override
                                         public void onComplete(@NonNull Task<AuthResult> task) {
@@ -269,10 +246,11 @@ public class Login extends AppCompatActivity {
                                                     public void onDataChange(DataSnapshot dataSnapshot) {
                                                         for (DataSnapshot keyNode : dataSnapshot.getChildren()) {
                                                             Family family = keyNode.getValue(Family.class);
-                                                            if (family.getCode().equals(familyCodeET.getText().toString())) {
-                                                                User.initUser(emailET.getText().toString(), firstNameET.getText().toString(), lastNameET.getText().toString()
+                                                            if (family.getCode().equals(familyCodeET.getEditText().getText().toString())) {
+                                                                User.initUser(emailET.getEditText().getText().toString(), firstNameET.getEditText().getText().toString(),
+                                                                        lastNameET.getEditText().getText().toString()
                                                                         , birthDayEnter.getText().toString());
-                                                                User.getInstance().setFamilyCode(familyCodeET.getText().toString());
+                                                                User.getInstance().setFamilyCode(familyCodeET.getEditText().getText().toString());
 
                                                                 Family.initFamily(User.getInstance().getFamilyCode(), User.getInstance().getLastName());
 
@@ -320,13 +298,14 @@ public class Login extends AppCompatActivity {
                                     });
 
                         } else {
-                            mAuth.createUserWithEmailAndPassword(emailET.getText().toString(), passwordlET.getText().toString())
+                            mAuth.createUserWithEmailAndPassword(emailET.getEditText().getText().toString(), passwordET.getEditText().getText().toString())
                                     .addOnCompleteListener((Activity) context, new OnCompleteListener<AuthResult>() {
                                         @Override
                                         public void onComplete(@NonNull Task<AuthResult> task) {
 
                                             if (task.isSuccessful()) {
-                                                User.initUser(emailET.getText().toString(), firstNameET.getText().toString(), lastNameET.getText().toString()
+                                                User.initUser(emailET.getEditText().getText().toString(), firstNameET.getEditText().getText().toString(),
+                                                        lastNameET.getEditText().getText().toString()
                                                         , birthDayEnter.getText().toString());
                                                 User.getInstance().setFamilyCode(String.valueOf(User.getInstance().hashCode()));
                                                 myRef.child(String.valueOf(User.getInstance().getEmail().hashCode())).setValue(User.getInstance());
@@ -381,12 +360,12 @@ public class Login extends AppCompatActivity {
     public boolean loginUiIsFull() {
         boolean flag = true;
 
-        if (emailET.getText().toString().equals("")) {
+        if (emailET.getEditText().getText().toString().equals("")) {
             emailET.setError("הכנס איימל");
             flag = false;
         }
-        if (passwordlET.getText().toString().equals("")) {
-            passwordlET.setError("הכנס סיסמא");
+        if (passwordET.getEditText().getText().toString().equals("")) {
+            passwordET.setError("הכנס סיסמא");
             flag = false;
         }
 
@@ -397,15 +376,15 @@ public class Login extends AppCompatActivity {
     public boolean signUiIsFull() {
         boolean flag = true;
 
-        if (emailET.getText().toString().equals("")) {
+        if (emailET.getEditText().getText().toString().equals("")) {
             emailET.setError("הכנס איימל");
             flag = false;
         }
-        if (firstNameET.getText().toString().equals("")) {
+        if (firstNameET.getEditText().getText().toString().equals("")) {
             firstNameET.setError("הכנס שם פרטי");
             flag = false;
         }
-        if (lastNameET.getText().toString().equals("")) {
+        if (lastNameET.getEditText().getText().toString().equals("")) {
             lastNameET.setError("הכנס שם משפחה");
             flag = false;
         }
@@ -421,7 +400,7 @@ public class Login extends AppCompatActivity {
     public boolean familyCodeUiISFull() {
         boolean flag = true;
 
-        if (familyCodeET.getText().toString().equals("")) {
+        if (familyCodeET.getEditText().getText().toString().equals("")) {
             flag = false;
         }
 

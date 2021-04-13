@@ -15,14 +15,6 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <ImageButton
-                android:id="@+id/back_to_searchRecipe"
-                android:layout_width="60dp"
-                android:layout_height="40dp"
-                android:background="#E53935"
-                android:gravity="left"
-                android:src="@drawable/ic_arrow_back_black_24dp" />
-
         </LinearLayout>
 
         <ImageView
@@ -35,7 +27,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:textSize="30dp"
+            android:textSize="30sp"
             android:textStyle="bold" />
 
         <LinearLayout
@@ -43,16 +35,18 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
                 android:layout_weight="2"
                 android:elevation="20dp"
-                app:cardBackgroundColor="@color/cardview_shadow_start_color"
-                app:cardCornerRadius="20dp"
-                android:layout_marginRight="5dp"
-                android:layout_marginLeft="5dp"
-                app:cardElevation="0dp">
+                app:cardBackgroundColor="#5CFFFDF6"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#72000000"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -75,18 +69,20 @@
 
 
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
                 android:layout_weight="2"
                 android:elevation="20dp"
-                app:cardBackgroundColor="@color/cardview_shadow_start_color"
-                android:layout_marginRight="5dp"
-                android:layout_marginLeft="5dp"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="0dp">
+                app:cardBackgroundColor="#5CFFFDF6"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#72000000"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -110,14 +106,8 @@
 
 
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
-            <com.like.LikeButton
-                app:icon_type="heart"
-                app:icon_size="25dp"
-                android:id="@+id/star_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
 
         </LinearLayout>
 
@@ -127,7 +117,7 @@
             android:gravity="center"
             android:text="רכיבים"
             android:textColor="#E53935"
-            android:textSize="20dp"
+            android:textSize="20sp"
             android:textStyle="bold" />
 
 
@@ -148,7 +138,7 @@
             android:gravity="center"
             android:text="הוראות הכנה"
             android:textColor="#E53935"
-            android:textSize="20dp"
+            android:textSize="20sp"
             android:textStyle="bold" />
 
         <androidx.cardview.widget.CardView
@@ -163,7 +153,8 @@
                 android:id="@+id/recipeInstructions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingRight="5dp"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
                 android:textStyle="bold" />
         </androidx.cardview.widget.CardView>
 
@@ -177,28 +168,37 @@
                 android:id="@+id/recipe_movieBtn"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_marginRight="5dp"
+                android:layout_marginEnd="5dp"
                 android:layout_weight="1"
                 android:background="#43A047"
                 android:src="@drawable/ic_ondemand_video_black_24dp" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/add_to_shopping_list"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="5dp"
-                android:layout_weight="2"
-                android:background="@drawable/costum_btn"
-                android:text="הוסף רכיבים חסרים לרשימת הקניות" />
+                android:layout_marginEnd="5dp"
+                android:layout_weight="1"
+                android:text="הוסף רכיבים חסרים לרשימת הקניות"
+                android:textColor="#000000"
+                android:textStyle="bold"
+                app:backgroundTint="#FDD835"
+                app:cornerRadius="20dp"
+                app:icon="@drawable/ic_shopping_cart_black_24dp"
+                app:iconGravity="textStart" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/complite_recipe"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="5dp"
-                android:layout_weight="2"
-                android:background="@drawable/costum_btn"
-                android:text="הכנתי את המתכון" />
+                android:layout_marginEnd="5dp"
+                android:layout_weight="1"
+                android:text="הכנתי את המתכון"
+                android:textStyle="bold"
+                app:backgroundTint="#7CB342"
+                app:cornerRadius="20dp"
+                app:icon="@drawable/ic_baseline_done_outline_24"
+                app:iconGravity="textStart" />
 
 
         </LinearLayout>
