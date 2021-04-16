@@ -8,6 +8,7 @@ import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.NumberPicker;
@@ -27,19 +28,20 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-public class EditFoodList extends Activity {
+public class EditFoodList extends Activity implements AdapterView.OnItemSelectedListener {
     private int width;
     private int heigh;
     private FoodItem currentFoodItem;
     private FoodItem currentBarcodeItem;
     private FoodItem currentShoppingItem;
     private Spinner edit_unit_spinner;
-    private TextView food_nameTV, foodUnitTV;
+    private TextView food_nameTV;
     private NumberPicker numberPicker;
     private Button updateBtn;
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference myRef;
     private String currentClass;
+    private String currentUnit;
 
 
     @Override
@@ -65,7 +67,7 @@ public class EditFoodList extends Activity {
         ArrayAdapter<CharSequence> unitsAdapter = ArrayAdapter.createFromResource(this, R.array.units, android.R.layout.simple_spinner_item);
         unitsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         edit_unit_spinner.setAdapter(unitsAdapter);
-     //   edit_unit_spinner.setOnItemSelectedListener(this);
+        edit_unit_spinner.setOnItemSelectedListener(this);
 
         numberPicker.setMinValue(0);
         numberPicker.setMaxValue(1000);
@@ -110,7 +112,7 @@ public class EditFoodList extends Activity {
                                 }
                             }
                             Family.getInstance().getFoodList().get(pos).setAmount(numberPicker.getValue());
-                            String currentFamilyCode;
+                            Family.getInstance().getFoodList().get(pos).setUnit(currentUnit);
                             myRef = database.getReference("families").child(User.getInstance().getFamilyCode()).child("foodStock");
                             myRef.setValue(Family.getInstance().getFoodList());
                             FoodStock.mAdapter.notifyDataSetChanged();
@@ -137,6 +139,7 @@ public class EditFoodList extends Activity {
                                 }
                             }
                             Family.getInstance().getShoppingList().get(pos).setAmount(numberPicker.getValue());
+                            Family.getInstance().getFoodList().get(pos).setUnit(currentUnit);
                             myRef = database.getReference("families").child(User.getInstance().getFamilyCode()).child("shoppingList");
                             myRef.setValue(Family.getInstance().getShoppingList());
                             ShoppingList.mAdapter.notifyDataSetChanged();
@@ -169,27 +172,30 @@ public class EditFoodList extends Activity {
 
         DisplayMetrics dm = new DisplayMetrics();
 
-        getWindowManager().
-
-                getDefaultDisplay().
-
-                getMetrics(dm);
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
 
         width = dm.widthPixels;
         heigh = dm.heightPixels;
 
-        getWindow().
-
-                setLayout((int) (width * .6), (int) (heigh * .2));
+        getWindow().setLayout((int) (width * .8), (int) (heigh * .2));
 
         WindowManager.LayoutParams params = getWindow().getAttributes();
         params.gravity = Gravity.CENTER;
-        // params.x = 0;
-        //  params.y = -20;
 
         getWindow().
 
                 setAttributes(params);
+
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        currentUnit = parent.getItemAtPosition(position).toString();
+
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
 
     }
 }

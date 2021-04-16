@@ -293,7 +293,9 @@ public class Recipe extends Fragment {
 
         return view;
 
+
     }
+
 
     public void sendChannel1(View v) {
 

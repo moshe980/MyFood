@@ -20,8 +20,6 @@ import com.example.myfood.Fragment.FoodStock;
 import com.example.myfood.Fragment.ShoppingList;
 import com.example.myfood.R;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -32,11 +30,11 @@ public class AddFoodList extends Activity implements AdapterView.OnItemSelectedL
     private Button addBtn;
     private TextInputLayout addET;
     private Spinner unitSpinner;
-    private String currentCategory;
     private String currentUnit;
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference myRef;
     private String currentClass;
+    boolean flag;
 
 
     @Override
@@ -51,8 +49,6 @@ public class AddFoodList extends Activity implements AdapterView.OnItemSelectedL
         unitSpinner = findViewById(R.id.unit_spinner);
         addNumberPicker = findViewById(R.id.add_numberPicker);
         addBtn = findViewById(R.id.add_food_item);
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
         addNumberPicker.setMinValue(1);
         addNumberPicker.setMaxValue(1000);
 
@@ -74,7 +70,16 @@ public class AddFoodList extends Activity implements AdapterView.OnItemSelectedL
                         finish();
                     } else {
                         myRef = database.getReference("families").child(User.getInstance().getFamilyCode()).child("foodStock");
-                        Family.getInstance().getFoodList().add(new FoodItem(null, addET.getEditText().getText().toString(), addNumberPicker.getValue(), currentUnit, null));
+                        Family.getInstance().getFoodList().parallelStream().forEach(foodItem -> {
+                            if (foodItem.getFoodDescription().equals(addET.getEditText().getText().toString())&&foodItem.getUnit().equals(currentUnit)) {
+                                foodItem.setAmount(foodItem.getAmount()+addNumberPicker.getValue());
+                                flag=true;
+                            }
+                        } );
+                        if(!flag) {
+                            Family.getInstance().getFoodList().add(new FoodItem(null, addET.getEditText().getText().toString(), addNumberPicker.getValue(), currentUnit, null));
+                        }
+                        flag=false;
                         myRef.setValue(Family.getInstance().getFoodList());
                         FoodStock.mAdapter.notifyDataSetChanged();
                         finish();

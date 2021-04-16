@@ -4,14 +4,12 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,7 +18,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.myfood.Activity.Login;
 import com.example.myfood.Activity.Popup.AddFoodList;
 import com.example.myfood.Activity.Popup.EditFoodList;
 import com.example.myfood.Adapter.FoodListAdapter;
@@ -28,8 +25,6 @@ import com.example.myfood.Class.Family;
 import com.example.myfood.Class.FoodItem;
 import com.example.myfood.Class.User;
 import com.example.myfood.R;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -45,7 +40,6 @@ import com.itextpdf.text.pdf.PdfStamper;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class ShoppingList extends Fragment {
     private RecyclerView mRecyclerView;

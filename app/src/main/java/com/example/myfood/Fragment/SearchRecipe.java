@@ -2,30 +2,18 @@ package com.example.myfood.Fragment;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.SearchView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager.widget.ViewPager;
 
-import com.example.myfood.Activity.ManageFood;
 import com.example.myfood.R;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-
-import java.util.List;
 
 
 public class SearchRecipe extends Fragment {
@@ -58,7 +46,7 @@ public class SearchRecipe extends Fragment {
                     Bundle bundle = new Bundle();
                     bundle.putString("searchET", searchET.getText().toString());
                     recipeResults.setArguments(bundle);
-                    getFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipeResults).commit();
+                    getParentFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipeResults,"recipeResults").addToBackStack("SearchRecipe").commit();
                 }
             }
         });
@@ -71,7 +59,7 @@ public class SearchRecipe extends Fragment {
                 bundle.putString("category", "בקר");
                 recipeResults.setArguments(bundle);
 
-                getFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipeResults).commit();
+                getParentFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipeResults,"recipeResults").addToBackStack("SearchRecipe").commit();
 
 
             }
@@ -84,7 +72,7 @@ public class SearchRecipe extends Fragment {
                 bundle.putString("category", "עוף");
                 recipeResults.setArguments(bundle);
 
-                getFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipeResults).commit();
+                getParentFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipeResults,"recipeResults").addToBackStack("SearchRecipe").commit();
             }
         });
         sideDishe_category.setOnClickListener(new View.OnClickListener() {
@@ -95,7 +83,7 @@ public class SearchRecipe extends Fragment {
                 bundle.putString("category", "תוספות");
                 recipeResults.setArguments(bundle);
 
-                getFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipeResults).commit();
+                getParentFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipeResults,"recipeResults").addToBackStack("SearchRecipe").commit();
             }
         });
         pasta_category.setOnClickListener(new View.OnClickListener() {
@@ -106,7 +94,7 @@ public class SearchRecipe extends Fragment {
                 bundle.putString("category", "פסטה");
                 recipeResults.setArguments(bundle);
 
-                getFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipeResults).commit();
+                getParentFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipeResults,"recipeResults").addToBackStack("SearchRecipe").commit();
 
 
             }
@@ -119,7 +107,7 @@ public class SearchRecipe extends Fragment {
                 bundle.putString("category", "ארוחות בוקר");
                 recipeResults.setArguments(bundle);
 
-                getFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipeResults).commit();
+                getParentFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipeResults,"recipeResults").addToBackStack("SearchRecipe").commit();
 
 
             }
@@ -131,8 +119,8 @@ public class SearchRecipe extends Fragment {
                 Bundle bundle = new Bundle();
                 bundle.putString("category", "קינוחים");
                 recipeResults.setArguments(bundle);
+                getParentFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipeResults,"recipeResults").addToBackStack("SearchRecipe").commit();
 
-                getFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipeResults).commit();
 
 
             }
@@ -145,7 +133,7 @@ public class SearchRecipe extends Fragment {
                 bundle.putString("category", "ראשונות");
                 recipeResults.setArguments(bundle);
 
-                getFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipeResults).commit();
+                getParentFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipeResults,"recipeResults").addToBackStack("SearchRecipe").commit();
 
 
             }
@@ -158,7 +146,7 @@ public class SearchRecipe extends Fragment {
                 bundle.putString("category", "צמחוני");
                 recipeResults.setArguments(bundle);
 
-                getFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipeResults).commit();
+                getParentFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipeResults,"recipeResults").addToBackStack("SearchRecipe").commit();
 
 
             }
@@ -171,11 +159,12 @@ public class SearchRecipe extends Fragment {
                 bundle.putString("category", "טבעוני");
                 recipeResults.setArguments(bundle);
 
-                getFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipeResults).commit();
+                getParentFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipeResults,"recipeResults").addToBackStack("SearchRecipe").commit();
 
 
             }
         });
+
 
         return view;
 

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.view.Gravity;
 import android.view.MenuItem;
@@ -31,7 +32,6 @@ import com.example.myfood.Fragment.Scan;
 import com.example.myfood.Fragment.SearchRecipe;
 import com.example.myfood.Fragment.ShoppingList;
 import com.example.myfood.R;
-import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -44,11 +44,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.functions.FirebaseFunctions;
-import com.google.firebase.functions.HttpsCallableResult;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.text.Text;
 import com.google.mlkit.vision.text.TextRecognition;
@@ -71,15 +66,13 @@ public class ManageFood extends AppCompatActivity implements BottomNavigationVie
     public TextView familiyCodeSlideTV;
     public TextView userScoreTV;
     public TextView familiyScoreTV;
-    private FirebaseFunctions mFunctions;
+    private boolean doubleBackToExitPressedOnce;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().getDecorView().setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         setContentView(R.layout.activity_manage_food);
-        mFunctions = FirebaseFunctions.getInstance();
-        mFunctions.useEmulator("10.0.2.2.", 5001);
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         context = this;
@@ -125,7 +118,6 @@ public class ManageFood extends AppCompatActivity implements BottomNavigationVie
                         nameSlideTV.setText(currentUser.getFirstName() + " " + currentUser.getLastName());
                         familiyCodeSlideTV.setText("קוד משפחה: " + currentUser.getFamilyCode());
                         userScoreTV.setText("ניקוד שצברתי: " + currentUser.getScore());
-                        //familiyScoreTV.setText("ניקוד משפחתי: " + currentUser.getFamilyCode());
 
                         break;
 
@@ -171,14 +163,13 @@ public class ManageFood extends AppCompatActivity implements BottomNavigationVie
             case R.id.nav_search_recipe:
                 bottomNav.setVisibility(View.GONE);
                 toolbar_text.setText("חפש מתכונים");
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container,
-                        new SearchRecipe()).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, new SearchRecipe()).commit();
                 break;
             case R.id.nav_achievements:
                 bottomNav.setVisibility(View.GONE);
                 toolbar_text.setText("משימות");
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container,
-                        new Achievements()).commit();
+                        new Achievements()).addToBackStack(null).commit();
                 break;
             case R.id.nav_log_out:
                 Intent intent = new Intent(this, Login.class);
@@ -198,12 +189,30 @@ public class ManageFood extends AppCompatActivity implements BottomNavigationVie
 
     @Override
     public void onBackPressed() {
+
         if (drawer.isDrawerOpen(GravityCompat.END)) {
             drawer.closeDrawer(GravityCompat.END);
-        } else {
+        }
+        if (doubleBackToExitPressedOnce) {
             super.onBackPressed();
+            return;
+        }
+        int count = getSupportFragmentManager().getBackStackEntryCount();
+        if (count >= 1 && !doubleBackToExitPressedOnce) {
+            getSupportFragmentManager().popBackStack();
+        } else {
+            Toast.makeText(this, "לחץ עוד פעם כדי לצאת!", Toast.LENGTH_SHORT).show();
+            this.doubleBackToExitPressedOnce = true;
+            new Handler().postDelayed(new Runnable() {
+
+                @Override
+                public void run() {
+                    doubleBackToExitPressedOnce = false;
+                }
+            }, 2000);
         }
     }
+
 
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
             new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -399,20 +408,6 @@ public class ManageFood extends AppCompatActivity implements BottomNavigationVie
 
     }
 
-    private Task<JsonElement> annotateImage(String requestJson) {
-        return mFunctions
-                .getHttpsCallable("annotateImage")
-                .call(requestJson)
-                .continueWith(new Continuation<HttpsCallableResult, JsonElement>() {
-                    @Override
-                    public JsonElement then(@NonNull Task<HttpsCallableResult> task) {
-                        // This continuation runs on either success or failure, but if the task
-                        // has failed then getResult() will throw an Exception which will be
-                        // propagated down.
-                        return JsonParser.parseString(new Gson().toJson(task.getResult().getData()));
-                    }
-                });
-    }
 
     private Bitmap scaleBitmapDown(Bitmap bitmap, int maxDimension) {
         int originalWidth = bitmap.getWidth();
@@ -432,5 +427,7 @@ public class ManageFood extends AppCompatActivity implements BottomNavigationVie
         }
         return Bitmap.createScaledBitmap(bitmap, resizedWidth, resizedHeight, false);
     }
+
+
 }
 

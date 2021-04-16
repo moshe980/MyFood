@@ -1,7 +1,6 @@
 package com.example.myfood.Fragment;
 
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,6 +39,7 @@ public class RecipeResults extends Fragment {
     private Switch aSwitch;
 
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
         final View view = inflater.inflate(R.layout.fragment_recipe_results, container, false);
 
         aSwitch = view.findViewById(R.id.mySwitch);
@@ -90,7 +90,7 @@ public class RecipeResults extends Fragment {
                         //set Fragmentclass Arguments
                         Recipe recipe = new Recipe();
                         recipe.setArguments(bundle);
-                        getParentFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipe).commit();
+                        getParentFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipe,"recipe").addToBackStack("recipeResults").commit();
                     }
                 });
             }
@@ -155,7 +155,7 @@ public class RecipeResults extends Fragment {
                                     //set Fragmentclass Arguments
                                     Recipe recipe = new Recipe();
                                     recipe.setArguments(bundle);
-                                    getParentFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipe).commit();
+                                    getParentFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipe,"recipe").addToBackStack("recipeResults").commit();
                                 }
                             });
                         }
@@ -192,10 +192,11 @@ public class RecipeResults extends Fragment {
                                 public void onItemClick(int position) {
                                     Bundle bundle = new Bundle();
                                     bundle.putSerializable("chosenRecipe", recipesList.get(position));
-                                    //set Fragmentclass Arguments
+                                    //set Fragment class Arguments
                                     Recipe recipe = new Recipe();
                                     recipe.setArguments(bundle);
-                                    getParentFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipe).commit();
+                                    getParentFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, recipe,"recipe").addToBackStack("recipeResults").commit();
+
                                 }
                             });
                         }
@@ -204,26 +205,10 @@ public class RecipeResults extends Fragment {
             }
         });
 
-        //On back press:
-        view.setFocusableInTouchMode(true);
-        view.requestFocus();
-        view.setOnKeyListener( new View.OnKeyListener()
-        {
-            @Override
-            public boolean onKey( View v, int keyCode, KeyEvent event )
-            {
-                if( keyCode == KeyEvent.KEYCODE_BACK )
-                {
-                    getParentFragmentManager().beginTransaction().replace(R.id.fragment_bottom_container, new SearchRecipe()).commit();
-                    return true;
-                }
-                return false;
-            }
-        } );
+
         return view;
 
     }
-
 
 
 }

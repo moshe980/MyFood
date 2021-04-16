@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -56,9 +57,9 @@ public class Login extends AppCompatActivity {
     private DatePickerDialog.OnDateSetListener mDateSetListener;
     private ProgressBar progressBar;
     private FirebaseAuth mAuth;
-    private static final int STORGE_PERMISSION_CODE = 1;
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference myRef = database.getReference("users");
+    private boolean doubleBackToExitPressedOnce;
 
 
     @Override
@@ -405,6 +406,28 @@ public class Login extends AppCompatActivity {
         }
 
         return flag;
+
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        if (doubleBackToExitPressedOnce) {
+            super.onBackPressed();
+            return;
+        }
+
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "לחץ עוד פעם כדי לצאת!", Toast.LENGTH_SHORT).show();
+
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce = false;
+            }
+        }, 2000);
+
 
     }
 }
