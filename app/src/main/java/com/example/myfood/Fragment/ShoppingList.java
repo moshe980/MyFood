@@ -1,5 +1,6 @@
 package com.example.myfood.Fragment;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -22,14 +23,10 @@ import com.example.myfood.Activity.Popup.AddFoodList;
 import com.example.myfood.Activity.Popup.EditFoodList;
 import com.example.myfood.Adapter.FoodListAdapter;
 import com.example.myfood.Class.Family;
-import com.example.myfood.Class.FoodItem;
-import com.example.myfood.Class.User;
+import com.example.myfood.Class.FirebaseManager;
+import com.example.myfood.Class.RightJustifyAlertDialog;
 import com.example.myfood.R;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Paragraph;
@@ -47,8 +44,6 @@ public class ShoppingList extends Fragment {
     private RecyclerView.LayoutManager mLayoutManager;
     private Button addBtn;
     private ImageButton shareListBtn;
-    private FirebaseDatabase database = FirebaseDatabase.getInstance();
-    private DatabaseReference myRef;
 
     @Nullable
     @Override
@@ -58,44 +53,60 @@ public class ShoppingList extends Fragment {
         addBtn = view.findViewById(R.id.add_food_item);
         shareListBtn = view.findViewById(R.id.share_list);
 
-        myRef = database.getReference("families").child(User.getInstance().getFamilyCode());
-        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+
+        mRecyclerView = view.findViewById(R.id.food_list_recyclerView);
+        mRecyclerView.setHasFixedSize(true);
+        FirebaseManager.getInstance().getShoppingList(new FirebaseManager.FirebaseCallBack() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Family.getInstance().getShoppingList().clear();
-                for (DataSnapshot keyNode : snapshot.child("shoppingList").getChildren()) {
-                    FoodItem foodItem = keyNode.getValue(FoodItem.class);
-                    Family.getInstance().getShoppingList().add(foodItem);
+            public void onCallback(FirebaseManager.FirebaseResult result) {
+                if (result.isSuccessful()) {
+                    mAdapter = new FoodListAdapter(Family.getInstance().getShoppingList());
+                    if (Family.getInstance().getShoppingList().size() > 0) {
+                        mRecyclerView.setAdapter(mAdapter);
+                        mAdapter.setOnItemClickListener(new FoodListAdapter.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(int position) {
+                                Intent intent = new Intent(getContext(), EditFoodList.class);
+                                intent.putExtra("shoppingFoodItem", Family.getInstance().getShoppingList().get(position));
+                                intent.putExtra("Class", "ShoppingList");
+                                startActivity(intent);
+                            }
+
+                            @Override
+                            public void onItemLongClickListener(int position) {
+                                MaterialAlertDialogBuilder builder = new RightJustifyAlertDialog(getActivity());
+                                builder.setTitle("הסרת מוצר")
+                                        .setMessage("להסיר את ה" + Family.getInstance().getShoppingList().get(position).getFoodDescription());
+                                builder.setPositiveButton("אישור", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        Family.getInstance().getShoppingList().remove(i);
+                                        mAdapter.notifyDataSetChanged();
+                                        FirebaseManager.getInstance().setShoppingList(new FirebaseManager.FirebaseCallBack() {
+                                            @Override
+                                            public void onCallback(FirebaseManager.FirebaseResult result) {
+
+                                            }
+                                        });
+
+                                    }
+                                });
+                                builder.setNegativeButton("ביטול", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                                    }
+                                });
+                                builder.show();
+                            }
+                        });
+                    }
+                    mLayoutManager = new LinearLayoutManager(getContext());
+
+                    mRecyclerView.setLayoutManager(mLayoutManager);
 
                 }
-
-
-                mRecyclerView = view.findViewById(R.id.food_list_recyclerView);
-                mRecyclerView.setHasFixedSize(true);
-                mAdapter = new FoodListAdapter(Family.getInstance().getShoppingList());
-                if (Family.getInstance().getShoppingList().size() > 0) {
-                    mRecyclerView.setAdapter(mAdapter);
-                    mAdapter.setOnItemClickListener(new FoodListAdapter.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(int position) {
-                            Intent intent = new Intent(getContext(), EditFoodList.class);
-                            intent.putExtra("shoppingFoodItem", Family.getInstance().getShoppingList().get(position));
-                            intent.putExtra("Class", "ShoppingList");
-                            startActivity(intent);
-                        }
-                    });
-                }
-                mLayoutManager = new LinearLayoutManager(getContext());
-
-                mRecyclerView.setLayoutManager(mLayoutManager);
-
             }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-
         });
 
 

@@ -1,6 +1,5 @@
 package com.example.myfood.Activity;
 
-import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -11,7 +10,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -19,23 +17,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.myfood.Class.Family;
+import com.example.myfood.Class.FirebaseManager;
 import com.example.myfood.Class.User;
 import com.example.myfood.R;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -48,7 +35,7 @@ public class Login extends AppCompatActivity {
     private TextInputLayout passwordET;
     private TextInputLayout firstNameET;
     private TextInputLayout lastNameET;
-    public TextView birthDayEnter;
+    private TextView birthDayEnter;
     private TextView birthDayTV;
     private TextInputLayout familyCodeET;
     private TextView creatAccountTV;
@@ -56,9 +43,6 @@ public class Login extends AppCompatActivity {
     private Context context;
     private DatePickerDialog.OnDateSetListener mDateSetListener;
     private ProgressBar progressBar;
-    private FirebaseAuth mAuth;
-    private FirebaseDatabase database = FirebaseDatabase.getInstance();
-    DatabaseReference myRef = database.getReference("users");
     private boolean doubleBackToExitPressedOnce;
 
 
@@ -73,8 +57,6 @@ public class Login extends AppCompatActivity {
                         , Manifest.permission.READ_EXTERNAL_STORAGE},
                 STORGE_PERMISSION_CODE);
 */
-        mAuth = FirebaseAuth.getInstance();
-
         context = this;
         familyCodeET = findViewById(R.id.familyCodeET);
         emailET = findViewById(R.id.emailET);
@@ -173,49 +155,25 @@ public class Login extends AppCompatActivity {
                     case "התחבר":
                         if (loginUiIsFull()) {
                             progressBar.setVisibility(View.VISIBLE);
-                            mAuth.signInWithEmailAndPassword(emailET.getEditText().getText().toString(), passwordET.getEditText().getText().toString())
-                                    .addOnCompleteListener((Activity) context, new OnCompleteListener<AuthResult>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<AuthResult> task) {
-                                            if (task.isSuccessful()) {
-                                                // Login in success, update UI with the signed-in user's information
-                                                myRef = database.getReference("users").child(String.valueOf(FirebaseAuth.getInstance().getCurrentUser().getEmail().hashCode()));
-                                                myRef.addValueEventListener(new ValueEventListener() {
-                                                    @Override
-                                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                        User currentUser = snapshot.getValue(User.class);
-                                                        User.initUser(currentUser.getEmail(), currentUser.getFirstName(), currentUser.getLastName(), currentUser.getBirthDay());
-                                                        User.getInstance().setFamilyCode(currentUser.getFamilyCode());
+                            String email = emailET.getEditText().getText().toString();
+                            String password = passwordET.getEditText().getText().toString();
+                            FirebaseManager.getInstance().login(Login.this, email, password, new FirebaseManager.FirebaseCallBack() {
+                                @Override
+                                public void onCallback(FirebaseManager.FirebaseResult result) {
+                                    if (result.isSuccessful()) {
+                                        progressBar.setVisibility(View.GONE);
+                                        Intent intent = new Intent(context, ManageFood.class);
+                                        startActivity(intent);
+                                        finish();
+                                    } else {
+                                        progressBar.setVisibility(View.GONE);
 
-                                                        Family.initFamily(currentUser.getFamilyCode(), currentUser.getLastName());
+                                    }
 
-                                                        Log.d("TAG", "signInWithEmail:success");
-                                                        Intent intent = new Intent(context, ManageFood.class);
-                                                        startActivity(intent);
-                                                        finish();
-                                                        progressBar.setVisibility(View.GONE);
+                                }
 
+                            });
 
-                                                    }
-
-                                                    @Override
-                                                    public void onCancelled(@NonNull DatabaseError error) {
-                                                        progressBar.setVisibility(View.GONE);
-
-                                                    }
-                                                });
-
-                                            } else {
-                                                // If sign in fails, display a message to the user.
-                                                Log.w("TAG", "signInWithEmail:failure", task.getException());
-                                                Toast.makeText(context, "האימייל או הסיסמא אינם נכונים",
-                                                        Toast.LENGTH_SHORT).show();
-                                                progressBar.setVisibility(View.GONE);
-
-                                            }
-
-                                        }
-                                    });
                         }
                         break;
                     case "הבא":
@@ -232,109 +190,29 @@ public class Login extends AppCompatActivity {
                         }
                         break;
                     case "הירשם":
-                        if (familyCodeUiISFull()) {
-                            progressBar.setVisibility(View.VISIBLE);
-                            mAuth.createUserWithEmailAndPassword(emailET.getEditText().getText().toString(), passwordET.getEditText().getText().toString())
-                                    .addOnCompleteListener((Activity) context, new OnCompleteListener<AuthResult>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<AuthResult> task) {
+                        progressBar.setVisibility(View.VISIBLE);
+                        User.initUser(emailET.getEditText().getText().toString()
+                                , firstNameET.getEditText().getText().toString()
+                                , lastNameET.getEditText().getText().toString()
+                                , birthDayTV.getText().toString()
+                                , null,String.valueOf(0),String.valueOf(0),String.valueOf(0));
+                        User.getInstance().setFamilyCode(familyCodeET.getEditText().getText().toString());
+                        String password = passwordET.getEditText().getText().toString();
 
-                                            if (task.isSuccessful()) {
-                                                myRef = database.getReference("families");
-
-                                                myRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                    @Override
-                                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                                        for (DataSnapshot keyNode : dataSnapshot.getChildren()) {
-                                                            Family family = keyNode.getValue(Family.class);
-                                                            if (family.getCode().equals(familyCodeET.getEditText().getText().toString())) {
-                                                                User.initUser(emailET.getEditText().getText().toString(), firstNameET.getEditText().getText().toString(),
-                                                                        lastNameET.getEditText().getText().toString()
-                                                                        , birthDayEnter.getText().toString());
-                                                                User.getInstance().setFamilyCode(familyCodeET.getEditText().getText().toString());
-
-                                                                Family.initFamily(User.getInstance().getFamilyCode(), User.getInstance().getLastName());
-
-                                                                myRef = database.getReference("users");
-                                                                myRef.child(String.valueOf(User.getInstance().getEmail().hashCode())).setValue(User.getInstance());
-
-
-                                                                Log.d("TAG", "נרשמת בהצלחה");
-                                                                Toast.makeText(getApplicationContext(), "נרשמת בהצלחה!", Toast.LENGTH_LONG).show();
-                                                                progressBar.setVisibility(View.GONE);
-                                                                Intent intent = new Intent(context, ManageFood.class);
-                                                                startActivity(intent);
-                                                                finish();
-                                                                break;
-                                                            } else {
-
-                                                                progressBar.setVisibility(View.GONE);
-                                                                familyCodeET.setError("לא קיימת קבוצה עם אותו הקוד!");
-                                                                FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-                                                                firebaseUser.delete();
-                                                            }
-
-
-                                                        }
-
-                                                    }
-
-                                                    @Override
-                                                    public void onCancelled(DatabaseError error) {
-                                                        // Failed to read value
-                                                        Log.w("TAG", "Failed to read value.", error.toException());
-
-                                                    }
-                                                });
-
-
-                                            } else {
-                                                Log.w("TAG", "createUserWithEmail:failure", task.getException());
-
-                                                Toast.makeText(getApplicationContext(), "החיבור כשל תנסה בפעם אחרת!", Toast.LENGTH_LONG).show();
-                                                progressBar.setVisibility(View.GONE);
-
-                                            }
-                                        }
-                                    });
-
-                        } else {
-                            mAuth.createUserWithEmailAndPassword(emailET.getEditText().getText().toString(), passwordET.getEditText().getText().toString())
-                                    .addOnCompleteListener((Activity) context, new OnCompleteListener<AuthResult>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<AuthResult> task) {
-
-                                            if (task.isSuccessful()) {
-                                                User.initUser(emailET.getEditText().getText().toString(), firstNameET.getEditText().getText().toString(),
-                                                        lastNameET.getEditText().getText().toString()
-                                                        , birthDayEnter.getText().toString());
-                                                User.getInstance().setFamilyCode(String.valueOf(User.getInstance().hashCode()));
-                                                myRef.child(String.valueOf(User.getInstance().getEmail().hashCode())).setValue(User.getInstance());
-
-                                                Family.initFamily(User.getInstance().getFamilyCode(), User.getInstance().getLastName());
-
-                                                myRef = database.getReference("families");
-                                                myRef.child(User.getInstance().getFamilyCode()).setValue(Family.getInstance());
-
-
-                                                Log.d("TAG", "נרשמת בהצלחה");
-                                                Toast.makeText(getApplicationContext(), "נרשמת בהצלחה!", Toast.LENGTH_SHORT).show();
-                                                progressBar.setVisibility(View.GONE);
-                                                Intent intent = new Intent(context, ManageFood.class);
-                                                startActivity(intent);
-                                                finish();
-                                            } else {
-                                                Log.w("TAG", "createUserWithEmail:failure", task.getException());
-
-                                                Toast.makeText(getApplicationContext(), "החיבור כשל תנסה בפעם אחרת!", Toast.LENGTH_LONG).show();
-                                                progressBar.setVisibility(View.GONE);
-
-                                            }
-                                        }
-                                    });
-
-                        }
-
+                        FirebaseManager.getInstance().signIn(Login.this, password, new FirebaseManager.FirebaseCallBack() {
+                            @Override
+                            public void onCallback(FirebaseManager.FirebaseResult result) {
+                                if (result.isSuccessful()) {
+                                    progressBar.setVisibility(View.GONE);
+                                    Intent intent = new Intent(context, ManageFood.class);
+                                    startActivity(intent);
+                                    finish();
+                                } else {
+                                    progressBar.setVisibility(View.GONE);
+                                    familyCodeET.setError("לא קיימת קבוצה עם אותו הקוד!");
+                                }
+                            }
+                        });
                         break;
 
                 }
@@ -397,18 +275,6 @@ public class Login extends AppCompatActivity {
         return flag;
 
     }
-
-    public boolean familyCodeUiISFull() {
-        boolean flag = true;
-
-        if (familyCodeET.getEditText().getText().toString().equals("")) {
-            flag = false;
-        }
-
-        return flag;
-
-    }
-
     @Override
     public void onBackPressed() {
 

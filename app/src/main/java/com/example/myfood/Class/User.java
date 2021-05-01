@@ -1,7 +1,6 @@
 package com.example.myfood.Class;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Objects;
 
 public class User implements Serializable {
@@ -15,20 +14,21 @@ public class User implements Serializable {
     private String score;
     private static User instance;
 
-    public static void initUser(String email, String firstName, String lastName, String birthDay) {
+    public static void initUser(String email, String firstName, String lastName, String birthDay,String familyCode,String num_scans,String num_cooks,String score) {
         if (instance == null) {
-            instance = new User(email, firstName, lastName, birthDay);
+            instance = new User(email, firstName, lastName, birthDay,familyCode,num_scans,num_cooks,score);
         }
     }
 
-    public User(String email, String firstName, String lastName, String birthDay) {
+    public User(String email, String firstName, String lastName, String birthDay,String familyCode,String num_scans,String num_cooks,String score) {
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
         this.birthDay = birthDay;
-        this.num_scans = String.valueOf(0);
-        this.num_cooks = String.valueOf(0);
-        this.score = String.valueOf(0);
+        this.familyCode=familyCode;
+        this.num_scans = num_scans;
+        this.num_cooks = num_cooks;
+        this.score = score;
 
     }
 

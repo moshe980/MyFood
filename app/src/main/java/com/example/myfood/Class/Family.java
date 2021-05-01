@@ -9,7 +9,6 @@ public class Family implements Serializable {
     private String score;
     private ArrayList<FoodItem> foodList;
     private ArrayList<FoodItem> shoppingList;
-
     private static Family instance;
 
     public static void initFamily(String code, String name) {

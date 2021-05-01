@@ -1,5 +1,6 @@
 package com.example.myfood.Fragment;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -18,14 +19,10 @@ import com.example.myfood.Activity.Popup.AddFoodList;
 import com.example.myfood.Activity.Popup.EditFoodList;
 import com.example.myfood.Adapter.FoodListAdapter;
 import com.example.myfood.Class.Family;
-import com.example.myfood.Class.FoodItem;
-import com.example.myfood.Class.User;
+import com.example.myfood.Class.FirebaseManager;
+import com.example.myfood.Class.RightJustifyAlertDialog;
 import com.example.myfood.R;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 public class FoodStock extends Fragment {
 
@@ -33,8 +30,6 @@ public class FoodStock extends Fragment {
     public static FoodListAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private Button addBtn;
-    private FirebaseDatabase database = FirebaseDatabase.getInstance();
-    private DatabaseReference myRef;
     private ImageView emptyFridge;
 
 
@@ -45,46 +40,66 @@ public class FoodStock extends Fragment {
 
         addBtn = view.findViewById(R.id.add_food_item);
         emptyFridge = view.findViewById(R.id.cartoon_empty_fridge);
+        emptyFridge.setVisibility(view.GONE);
         mRecyclerView = view.findViewById(R.id.food_stock_recyclerView);
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(getContext());
-        emptyFridge.setVisibility(view.GONE);
 
-        myRef = database.getReference("families").child(User.getInstance().getFamilyCode());
-        myRef.addValueEventListener(new ValueEventListener() {
+        FirebaseManager.getInstance().getFoodList(new FirebaseManager.FirebaseCallBack() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Family.getInstance().getFoodList().clear();
-                for (DataSnapshot keyNode : snapshot.child("foodStock").getChildren()) {
-                    FoodItem foodItem = keyNode.getValue(FoodItem.class);
-                    Family.getInstance().getFoodList().add(foodItem);
-                }
+            public void onCallback(FirebaseManager.FirebaseResult result) {
+                if (result.isSuccessful()) {
+                    mAdapter = new FoodListAdapter(Family.getInstance().getFoodList());
+                    if (Family.getInstance().getFoodList().size() > 0) {
+                        emptyFridge.setVisibility(view.GONE);
+                        mAdapter.setOnItemClickListener(new FoodListAdapter.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(int position) {
+                                Intent intent = new Intent(getContext(), EditFoodList.class);
+                                intent.putExtra("foodItem", Family.getInstance().getFoodList().get(position));
+                                intent.putExtra("Class", "FoodStock");
+                                startActivity(intent);
+                            }
 
-                mAdapter = new FoodListAdapter( Family.getInstance().getFoodList());
-                if (Family.getInstance().getFoodList().size() > 0) {
-                    emptyFridge.setVisibility(view.GONE);
+                            @Override
+                            public void onItemLongClickListener(int position) {
+                                MaterialAlertDialogBuilder builder = new RightJustifyAlertDialog(getActivity());
+                                builder.setTitle("הסרת מוצר")
+                                        .setMessage("להסיר את ה" + Family.getInstance().getFoodList().get(position).getFoodDescription());
+                                builder.setPositiveButton("אישור", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        Family.getInstance().getFoodList().remove(position);
+                                        mAdapter.notifyDataSetChanged();
+                                        FirebaseManager.getInstance().setFoodList(new FirebaseManager.FirebaseCallBack() {
+                                            @Override
+                                            public void onCallback(FirebaseManager.FirebaseResult result) {
+
+                                            }
+                                        });
+                                    }
+                                });
+                                builder.setNegativeButton("ביטול", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                                    }
+                                });
+                                builder.show();
+                            }
+                        });
+
+                    } else {
+                        emptyFridge.setVisibility(view.VISIBLE);
+
+                    }
                     mRecyclerView.setAdapter(mAdapter);
-                    mAdapter.setOnItemClickListener(new FoodListAdapter.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(int position) {
-                            Intent intent = new Intent(getContext(), EditFoodList.class);
-                            intent.putExtra("foodItem", Family.getInstance().getFoodList().get(position));
-                            intent.putExtra("Class", "FoodStock");
-                            startActivity(intent);
-                        }
-                    });
-                } else {
+                    mRecyclerView.setLayoutManager(mLayoutManager);
+
+                }else{
                     emptyFridge.setVisibility(view.VISIBLE);
 
                 }
-                mRecyclerView.setLayoutManager(mLayoutManager);
-
-            }
-
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
             }
         });
 
@@ -104,6 +119,6 @@ public class FoodStock extends Fragment {
 
 
     }
-
-
 }
+
+

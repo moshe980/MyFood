@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.myfood.Activity.RecipeMovie;
 import com.example.myfood.Adapter.FoodListAdapter;
 import com.example.myfood.Class.Family;
+import com.example.myfood.Class.FirebaseManager;
 import com.example.myfood.Class.FoodItem;
 import com.example.myfood.Class.RecipeItem;
 import com.example.myfood.Class.RightJustifyAlertDialog;
@@ -33,11 +34,6 @@ import com.example.myfood.R;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -57,8 +53,6 @@ public class Recipe extends Fragment {
     private RecyclerView mRecyclerView;
     public static FoodListAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
-    private FirebaseDatabase database = FirebaseDatabase.getInstance();
-    private DatabaseReference myRef;
     private boolean flag = false;
     private NotificationManagerCompat notificationManager;
     private String dialogResult;
@@ -216,39 +210,29 @@ public class Recipe extends Fragment {
                     }).show();
                 }
             }
+
+            @Override
+            public void onItemLongClickListener(int position) {
+
+            }
         });
         add_to_shopping_listBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                myRef = database.getReference("users");
-                myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+
+
+
+                for (int i = 0; i < unIngredientsList.size(); i++) {
+                    unIngredientsList.get(i).setAvailable(0);
+                }
+                FirebaseManager.getInstance().setShoppingList(new FirebaseManager.FirebaseCallBack() {
                     @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        String currentFamilyCode;
-                        for (DataSnapshot keyNode : snapshot.getChildren()) {
-                            if (keyNode.child("email").getValue(String.class).equals(user.getEmail())) {
-                                currentFamilyCode = keyNode.child("familyCode").getValue(String.class);
-                                myRef = database.getReference("families");
-                                String finalCurrentFamilyCode = currentFamilyCode;
-                                myRef = database.getReference("families").child(finalCurrentFamilyCode).child("shoppingList");
-                                for (int i = 0; i < unIngredientsList.size(); i++) {
-                                    unIngredientsList.get(i).setAvailable(0);
-                                }
-                                myRef.setValue(unIngredientsList);
-
-                                break;
-
-                            }
-                        }
-
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
+                    public void onCallback(FirebaseManager.FirebaseResult result) {
+                        Toast.makeText(getContext(), "המצרכים נוספו לרשימת הקניות", Toast.LENGTH_SHORT).show();
 
                     }
                 });
-                Toast.makeText(getContext(), "המצרכים נוספו לרשימת הקניות", Toast.LENGTH_SHORT).show();
+
             }
         });
 
@@ -263,26 +247,10 @@ public class Recipe extends Fragment {
 
                     }
                 }
-                myRef = database.getReference("users");
-                myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+
+                FirebaseManager.getInstance().updateNum_cooks(new FirebaseManager.FirebaseCallBack() {
                     @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        int current_num_cooks;
-                        for (DataSnapshot keyNode : snapshot.getChildren()) {
-                            if (keyNode.child("email").getValue(String.class).equals(user.getEmail())) {
-                                current_num_cooks = Integer.parseInt(keyNode.child("num_cooks").getValue(String.class));
-                                current_num_cooks++;
-                                keyNode.getRef().child("num_cooks").setValue(String.valueOf(current_num_cooks));
-
-                                break;
-
-                            }
-                        }
-
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
+                    public void onCallback(FirebaseManager.FirebaseResult result) {
 
                     }
                 });

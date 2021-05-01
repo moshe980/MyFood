@@ -3,6 +3,7 @@ package com.example.myfood.Adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -18,14 +19,18 @@ import java.util.ArrayList;
 public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.FoodListViewHolder> {
     private ArrayList<FoodItem> foodList;
     private OnItemClickListener mlistener;
+    private AdapterView.OnItemLongClickListener mLonglistener;
 
     public interface OnItemClickListener {
         void onItemClick(int position);
+        void onItemLongClickListener(int position);
+
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
         mlistener = listener;
     }
+    public void setOnItemLongClickListener(AdapterView.OnItemLongClickListener listener){mLonglistener = listener;}
 
     public static class FoodListViewHolder extends RecyclerView.ViewHolder {
         public TextView foodDiscription;
@@ -49,6 +54,20 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.FoodLi
                             listener.onItemClick(position);
                         }
                     }
+                }
+            });
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    if (listener != null) {
+                        int position = getAdapterPosition();
+                        if (position != RecyclerView.NO_POSITION) {
+                            listener.onItemLongClickListener(position);
+                            return true;
+                        }
+                    }
+                    return false;
+
                 }
             });
 

@@ -24,6 +24,7 @@ import androidx.fragment.app.Fragment;
 import com.canhub.cropper.CropImage;
 import com.example.myfood.Activity.Popup.EditFoodList;
 import com.example.myfood.Adapter.BarcodeListAdapter;
+import com.example.myfood.Class.FirebaseManager;
 import com.example.myfood.Class.FoodItem;
 import com.example.myfood.Class.User;
 import com.example.myfood.Fragment.Achievements;
@@ -32,23 +33,16 @@ import com.example.myfood.Fragment.Scan;
 import com.example.myfood.Fragment.SearchRecipe;
 import com.example.myfood.Fragment.ShoppingList;
 import com.example.myfood.R;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.text.Text;
 import com.google.mlkit.vision.text.TextRecognition;
 import com.google.mlkit.vision.text.TextRecognizer;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -58,14 +52,10 @@ public class ManageFood extends AppCompatActivity implements BottomNavigationVie
     public static ArrayList<FoodItem> barcodes;
     public static ArrayList<FoodItem> unidentified_barcodes;
 
-    public static User currentUser;
-    private FirebaseDatabase database = FirebaseDatabase.getInstance();
-    private DatabaseReference myRef;
     public NavigationView navigationView;
     public TextView nameSlideTV;
     public TextView familiyCodeSlideTV;
     public TextView userScoreTV;
-    public TextView familiyScoreTV;
     private boolean doubleBackToExitPressedOnce;
 
     @Override
@@ -74,7 +64,6 @@ public class ManageFood extends AppCompatActivity implements BottomNavigationVie
         getWindow().getDecorView().setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         setContentView(R.layout.activity_manage_food);
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         context = this;
         barcodes = new ArrayList();
         unidentified_barcodes = new ArrayList();
@@ -93,7 +82,6 @@ public class ManageFood extends AppCompatActivity implements BottomNavigationVie
         nameSlideTV = headerView.findViewById(R.id.nameSlide);
         familiyCodeSlideTV = headerView.findViewById(R.id.familiyCodeSlide);
         userScoreTV = headerView.findViewById(R.id.userScore);
-        familiyScoreTV = headerView.findViewById(R.id.familyScore);
 
         String type = getIntent().getStringExtra("From");
         if (type != null) {
@@ -107,31 +95,9 @@ public class ManageFood extends AppCompatActivity implements BottomNavigationVie
                     break;
             }
         }
-
-        myRef = database.getReference("users");
-        myRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot keyNode : snapshot.getChildren()) {
-                    if (keyNode.child("email").getValue(String.class).equals(user.getEmail())) {
-                        currentUser = keyNode.getValue(User.class);
-                        nameSlideTV.setText(currentUser.getFirstName() + " " + currentUser.getLastName());
-                        familiyCodeSlideTV.setText("קוד משפחה: " + currentUser.getFamilyCode());
-                        userScoreTV.setText("ניקוד שצברתי: " + currentUser.getScore());
-
-                        break;
-
-
-                    }
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
+        nameSlideTV.setText(User.getInstance().getFirstName() + " " + User.getInstance().getLastName());
+        familiyCodeSlideTV.setText("קוד משפחה: " + User.getInstance().getFamilyCode());
+        userScoreTV.setText("ניקוד שצברתי: " + User.getInstance().getScore());
 
 
         navigationView.setNavigationItemSelectedListener(this);
@@ -258,176 +224,125 @@ public class ManageFood extends AppCompatActivity implements BottomNavigationVie
                 InputImage imageInput = InputImage.fromBitmap(bitmap, 0);
 
                 TextRecognizer recognizer = TextRecognition.getClient();
-                Task<Text> resulta =
-                        recognizer.process(imageInput)
-                                .addOnSuccessListener(new OnSuccessListener<Text>() {
-                                    @Override
-                                    public void onSuccess(Text visionText) {
-                                        String resultText = visionText.getText();
-                                        String[] splitedS = resultText.split(" " + "|\\" + "\n");
+                Task<Text> resulta = recognizer.process(imageInput).addOnSuccessListener(new OnSuccessListener<Text>() {
+                    @Override
+                    public void onSuccess(Text visionText) {
+                        String resultText = visionText.getText();
+                        String[] splitedS = resultText.split(" " + "|\\" + "\n");
 
-                                        for (int i = 0; i < splitedS.length; i++) {
-                                            try {
-                                                if (splitedS[i].startsWith("729")) {
-                                                    System.out.println(splitedS[i].subSequence(0, 13));
-                                                    for (int j = i + 1; j < splitedS.length; j++) {
-                                                        if (splitedS[j].equals("x")) {
-                                                            barcodes.add(new FoodItem(splitedS[i].subSequence(0, 13).toString()
-                                                                    , null, Integer.parseInt(splitedS[j + 1].subSequence(0, 1).toString()), null, null));
+                        for (int i = 0; i < splitedS.length; i++) {
+                            try {
+                                if (splitedS[i].startsWith("729")) {
+                                    System.out.println(splitedS[i].subSequence(0, 13));
+                                    for (int j = i + 1; j < splitedS.length; j++) {
+                                        if (splitedS[j].equals("x")) {
+                                            barcodes.add(new FoodItem(splitedS[i].subSequence(0, 13).toString()
+                                                    , null, Integer.parseInt(splitedS[j + 1].subSequence(0, 1).toString()), null, null));
 
-                                                            break;
-                                                        } else if (splitedS[j].startsWith("729")) {
-                                                            barcodes.add(new FoodItem(splitedS[i].subSequence(0, 13).toString(), null, 1, null, null));
-                                                            break;
-                                                        }
-
-                                                    }
-                                                } else if (splitedS[i].equals("42442")) {
-                                                    boolean flag = false;
-                                                    for (int j = i + 1; j < splitedS.length; j++) {
-                                                        if (splitedS[j].equals("x")) {
-                                                            barcodes.add(new FoodItem("42442"
-                                                                    , null, Integer.parseInt(splitedS[j + 1].subSequence(0, 1).toString()), null, null));
-
-                                                            flag = true;
-                                                            break;
-                                                        } else if (splitedS[j].startsWith("729")) {
-                                                            barcodes.add(new FoodItem(splitedS[i].subSequence(0, 13).toString(), null, 1, null, null));
-                                                            flag = true;
-                                                            break;
-                                                        }
-
-                                                    }
-                                                    if (flag == false) {
-                                                        barcodes.add(new FoodItem("42442", null, 1, null, null));
-
-                                                    }
-                                                    flag = false;
-                                                }
-                                            } catch (Exception e) {
-                                                System.out.println("Error: " + e);
-
-                                            }
+                                            break;
+                                        } else if (splitedS[j].startsWith("729")) {
+                                            barcodes.add(new FoodItem(splitedS[i].subSequence(0, 13).toString(), null, 1, null, null));
+                                            break;
                                         }
-                                        myRef = database.getReference("products");
-                                        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                ArrayList<FoodItem> tmp = new ArrayList<FoodItem>(barcodes);
 
-                                                tmp.parallelStream().forEach(barcode -> {
-                                                    boolean flag = false;
-
-                                                    for (DataSnapshot keyNode : snapshot.getChildren()) {
-                                                        if (keyNode.getKey().equals(barcode.getBarcode())) {
-                                                            barcode.setFoodDescription(String.valueOf(keyNode.child("product_name").getValue()));
-                                                            barcode.setCategory(String.valueOf(keyNode.child("category").getValue()));
-                                                            barcode.setUnit(String.valueOf(keyNode.child("unit").getValue()));
-                                                            int amount = Integer.parseInt(String.valueOf(keyNode.child("amount").getValue()));
-                                                            double weight = Double.parseDouble(String.valueOf(keyNode.child("weight").getValue()));
-                                                            barcode.setAmount(amount * weight);
-                                                            flag = true;
-                                                            break;
-
-                                                        }
-
-                                                    }
-                                                    if (!flag) {
-                                                        unidentified_barcodes.add(barcode);
-                                                        barcodes.remove(barcode);
-                                                    }
-                                                    flag = false;
-
-                                                });
-
-
-                                                if (barcodes.size() != 0) {
-                                                    Scan.addItemsBtn.setVisibility(View.VISIBLE);
-
-                                                }
-                                                Scan.barcodesAdapter = new BarcodeListAdapter(barcodes);
-                                                Scan.barcodesRecyclerView.setAdapter(Scan.barcodesAdapter);
-                                                Scan.barcodesAdapter.setOnItemClickListener(new BarcodeListAdapter.OnItemClickListener() {
-                                                    @Override
-                                                    public void onItemClick(int position) {
-                                                        Intent intent = new Intent(context, EditFoodList.class);
-                                                        intent.putExtra("barcodeItem", barcodes.get(position));
-                                                        intent.putExtra("Class", "Scan");
-                                                        startActivity(intent);
-                                                    }
-                                                });
-                                                if (unidentified_barcodes.size() != 0) {
-                                                    Scan.unidentified_barcodesTV.setVisibility(View.VISIBLE);
-                                                }
-
-                                                Scan.unidentified_barcodes_Adapter = new BarcodeListAdapter(unidentified_barcodes);
-                                                Scan.unidentified_barcodes_recyclerView.setAdapter(Scan.unidentified_barcodes_Adapter);
-                                                Scan.unidentified_barcodes_Adapter.setOnItemClickListener(new BarcodeListAdapter.OnItemClickListener() {
-                                                    @Override
-                                                    public void onItemClick(int position) {
-                                                        Intent intent = new Intent(context, EditFoodList.class);
-                                                        if (barcodes.size() > 0) {
-                                                            intent.putExtra("barcodeItem", barcodes.get(position));
-                                                            intent.putExtra("Class", "Scan");
-                                                            startActivity(intent);
-                                                        } else if (unidentified_barcodes.size() > 0) {
-
-                                                        }
-
-                                                    }
-                                                });
-
-                                                Scan.progressBar.setVisibility(View.GONE);
-
-                                            }
-
-                                            @Override
-                                            public void onCancelled(@NonNull DatabaseError error) {
-
-                                            }
-                                        });
                                     }
-                                })
-                                .addOnFailureListener(
-                                        new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                Scan.progressBar.setVisibility(View.GONE);
-                                            }
-                                        });
+                                } else if (splitedS[i].equals("42442")) {
+                                    boolean flag = false;
+                                    for (int j = i + 1; j < splitedS.length; j++) {
+                                        if (splitedS[j].equals("x")) {
+                                            barcodes.add(new FoodItem("42442"
+                                                    , null, Integer.parseInt(splitedS[j + 1].subSequence(0, 1).toString()), null, null));
 
+                                            flag = true;
+                                            break;
+                                        } else if (splitedS[j].startsWith("729")) {
+                                            barcodes.add(new FoodItem(splitedS[i].subSequence(0, 13).toString(), null, 1, null, null));
+                                            flag = true;
+                                            break;
+                                        }
+
+                                    }
+                                    if (flag == false) {
+                                        barcodes.add(new FoodItem("42442", null, 1, null, null));
+
+                                    }
+                                    flag = false;
+                                }
+                            } catch (Exception e) {
+                                System.out.println("Error: " + e);
+
+                            }
+                        }
+                        ArrayList<FoodItem> tmp = new ArrayList<FoodItem>(barcodes);
+                        tmp.parallelStream().forEach(barcode -> {
+                            FirebaseManager.getInstance().isBarcodeExist(barcode.getBarcode(), new FirebaseManager.FirebaseCallBack() {
+                                @Override
+                                public void onCallback(FirebaseManager.FirebaseResult result) {
+                                    if (result.isSuccessful()) {
+                                        barcode.setFoodDescription(result.getBarcode().getFoodDescription());
+                                        barcode.setCategory(result.getBarcode().getCategory());
+                                        barcode.setUnit(result.getBarcode().getUnit());
+                                        barcode.setAmount(result.getBarcode().getAmount());
+                                    } else {
+                                        unidentified_barcodes.add(barcode);
+                                        barcodes.remove(barcode);
+
+                                    }
+                                }
+
+                            });
+
+                        });
+
+
+                        if (barcodes.size() != 0) {
+                            Scan.addItemsBtn.setVisibility(View.VISIBLE);
+
+                        }
+                        Scan.barcodesAdapter = new BarcodeListAdapter(barcodes);
+                        Scan.barcodesRecyclerView.setAdapter(Scan.barcodesAdapter);
+                        Scan.barcodesAdapter.setOnItemClickListener(new BarcodeListAdapter.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(int position) {
+                                Intent intent = new Intent(context, EditFoodList.class);
+                                intent.putExtra("barcodeItem", barcodes.get(position));
+                                intent.putExtra("Class", "Scan");
+                                startActivity(intent);
+                            }
+                        });
+                        if (unidentified_barcodes.size() != 0) {
+                            Scan.unidentified_barcodesTV.setVisibility(View.VISIBLE);
+                        }
+
+                        Scan.unidentified_barcodes_Adapter = new BarcodeListAdapter(unidentified_barcodes);
+                        Scan.unidentified_barcodes_recyclerView.setAdapter(Scan.unidentified_barcodes_Adapter);
+                        Scan.unidentified_barcodes_Adapter.setOnItemClickListener(new BarcodeListAdapter.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(int position) {
+                                Intent intent = new Intent(context, EditFoodList.class);
+                                if (barcodes.size() > 0) {
+                                    intent.putExtra("barcodeItem", barcodes.get(position));
+                                    intent.putExtra("Class", "Scan");
+                                    startActivity(intent);
+                                } else if (unidentified_barcodes.size() > 0) {
+
+                                }
+
+                            }
+
+
+                        });
+                    }
+                });
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-
-        } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
-            Exception e = result.getError();
-            Toast.makeText(this, "Error:" + e, Toast.LENGTH_SHORT).show();
         }
-
     }
-
-
-    private Bitmap scaleBitmapDown(Bitmap bitmap, int maxDimension) {
-        int originalWidth = bitmap.getWidth();
-        int originalHeight = bitmap.getHeight();
-        int resizedWidth = maxDimension;
-        int resizedHeight = maxDimension;
-
-        if (originalHeight > originalWidth) {
-            resizedHeight = maxDimension;
-            resizedWidth = (int) (resizedHeight * (float) originalWidth / (float) originalHeight);
-        } else if (originalWidth > originalHeight) {
-            resizedWidth = maxDimension;
-            resizedHeight = (int) (resizedWidth * (float) originalHeight / (float) originalWidth);
-        } else if (originalHeight == originalWidth) {
-            resizedHeight = maxDimension;
-            resizedWidth = maxDimension;
-        }
-        return Bitmap.createScaledBitmap(bitmap, resizedWidth, resizedHeight, false);
-    }
-
-
 }
+
+
+
 

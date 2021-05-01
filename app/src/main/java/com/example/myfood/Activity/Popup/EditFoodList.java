@@ -17,16 +17,14 @@ import android.widget.TextView;
 
 import com.example.myfood.Activity.ManageFood;
 import com.example.myfood.Class.Family;
+import com.example.myfood.Class.FirebaseManager;
 import com.example.myfood.Class.FoodItem;
-import com.example.myfood.Class.User;
 import com.example.myfood.Fragment.FoodStock;
 import com.example.myfood.Fragment.Scan;
 import com.example.myfood.Fragment.ShoppingList;
 import com.example.myfood.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 public class EditFoodList extends Activity implements AdapterView.OnItemSelectedListener {
     private int width;
@@ -38,8 +36,6 @@ public class EditFoodList extends Activity implements AdapterView.OnItemSelected
     private TextView food_nameTV;
     private NumberPicker numberPicker;
     private Button updateBtn;
-    private FirebaseDatabase database = FirebaseDatabase.getInstance();
-    private DatabaseReference myRef;
     private String currentClass;
     private String currentUnit;
 
@@ -95,10 +91,18 @@ public class EditFoodList extends Activity implements AdapterView.OnItemSelected
                         if (numberPicker.getValue() == 0) {
                             Family.getInstance().getShoppingList().add(currentFoodItem);
                             Family.getInstance().getFoodList().remove(currentFoodItem);
-                            myRef = database.getReference("families").child(User.getInstance().getFamilyCode()).child("shoppingList");
-                            myRef.setValue(Family.getInstance().getShoppingList());
-                            myRef = database.getReference("families").child(User.getInstance().getFamilyCode()).child("foodStock");
-                            myRef.setValue(Family.getInstance().getFoodList());
+                            FirebaseManager.getInstance().setFoodList(new FirebaseManager.FirebaseCallBack() {
+                                @Override
+                                public void onCallback(FirebaseManager.FirebaseResult result) {
+
+                                }
+                            });
+                            FirebaseManager.getInstance().setShoppingList(new FirebaseManager.FirebaseCallBack() {
+                                @Override
+                                public void onCallback(FirebaseManager.FirebaseResult result) {
+
+                                }
+                            });
                             FoodStock.mAdapter.notifyDataSetChanged();
                             ShoppingList.mAdapter.notifyDataSetChanged();
                             finish();
@@ -113,8 +117,12 @@ public class EditFoodList extends Activity implements AdapterView.OnItemSelected
                             }
                             Family.getInstance().getFoodList().get(pos).setAmount(numberPicker.getValue());
                             Family.getInstance().getFoodList().get(pos).setUnit(currentUnit);
-                            myRef = database.getReference("families").child(User.getInstance().getFamilyCode()).child("foodStock");
-                            myRef.setValue(Family.getInstance().getFoodList());
+                            FirebaseManager.getInstance().setFoodList(new FirebaseManager.FirebaseCallBack() {
+                                @Override
+                                public void onCallback(FirebaseManager.FirebaseResult result) {
+
+                                }
+                            });
                             FoodStock.mAdapter.notifyDataSetChanged();
                             finish();
                             break;
@@ -125,8 +133,12 @@ public class EditFoodList extends Activity implements AdapterView.OnItemSelected
                     case "ShoppingList":
                         if (numberPicker.getValue() == 0) {
                             Family.getInstance().getShoppingList().remove(currentShoppingItem);
-                            myRef = database.getReference("families").child(User.getInstance().getFamilyCode()).child("shoppingList");
-                            myRef.setValue(Family.getInstance().getShoppingList());
+                            FirebaseManager.getInstance().setShoppingList(new FirebaseManager.FirebaseCallBack() {
+                                @Override
+                                public void onCallback(FirebaseManager.FirebaseResult result) {
+
+                                }
+                            });
                             ShoppingList.mAdapter.notifyDataSetChanged();
                             finish();
 
@@ -140,8 +152,12 @@ public class EditFoodList extends Activity implements AdapterView.OnItemSelected
                             }
                             Family.getInstance().getShoppingList().get(pos).setAmount(numberPicker.getValue());
                             Family.getInstance().getFoodList().get(pos).setUnit(currentUnit);
-                            myRef = database.getReference("families").child(User.getInstance().getFamilyCode()).child("shoppingList");
-                            myRef.setValue(Family.getInstance().getShoppingList());
+                            FirebaseManager.getInstance().setShoppingList(new FirebaseManager.FirebaseCallBack() {
+                                @Override
+                                public void onCallback(FirebaseManager.FirebaseResult result) {
+
+                                }
+                            });
                             ShoppingList.mAdapter.notifyDataSetChanged();
                             finish();
 
@@ -166,6 +182,7 @@ public class EditFoodList extends Activity implements AdapterView.OnItemSelected
                         break;
 
                 }
+                finish();
             }
         });
 

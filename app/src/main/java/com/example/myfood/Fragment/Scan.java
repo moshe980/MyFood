@@ -197,7 +197,7 @@ public class Scan extends Fragment {
                     // Permission is granted. Continue the action or workflow in your
                     // app.
                 } else {
-                    requestWithExplainDialog("Need permission for send your code");
+                    requestWithExplainDialog("נדרשת הרשאה לטובת סריקת הקבלה");
                     Log.d("pttt", "No Granted");
 
                     // Explain to the user that the feature is unavailable because the
