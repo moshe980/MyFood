@@ -80,7 +80,7 @@ public class ShoppingList extends Fragment {
                                 builder.setPositiveButton("אישור", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
-                                        Family.getInstance().getShoppingList().remove(i);
+                                        Family.getInstance().getShoppingList().remove(position);
                                         mAdapter.notifyDataSetChanged();
                                         FirebaseManager.getInstance().setShoppingList(new FirebaseManager.FirebaseCallBack() {
                                             @Override

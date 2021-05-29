@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
@@ -19,14 +20,13 @@ import com.example.myfood.Class.FoodItem;
 import com.example.myfood.Fragment.FoodStock;
 import com.example.myfood.Fragment.ShoppingList;
 import com.example.myfood.R;
-import com.google.android.material.textfield.TextInputLayout;
 
 public class AddFoodList extends Activity implements AdapterView.OnItemSelectedListener {
     private int width;
     private int heigh;
     private NumberPicker addNumberPicker;
     private Button addBtn;
-    private TextInputLayout addET;
+    private AutoCompleteTextView addET;
     private Spinner unitSpinner;
     private String currentUnit;
     private String currentClass;
@@ -48,6 +48,9 @@ public class AddFoodList extends Activity implements AdapterView.OnItemSelectedL
         addNumberPicker.setMinValue(1);
         addNumberPicker.setMaxValue(1000);
 
+        String[] foodNames = getResources().getStringArray(R.array.foods);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, foodNames);
+        addET.setAdapter(adapter);
 
         ArrayAdapter<CharSequence> unitsAdapter = ArrayAdapter.createFromResource(this, R.array.units, android.R.layout.simple_spinner_item);
         unitsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -57,38 +60,30 @@ public class AddFoodList extends Activity implements AdapterView.OnItemSelectedL
         addBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!addET.getEditText().getText().toString().equals("")) {
+                if (!addET.getText().toString().equals("")) {
+
                     if (currentClass.equals("ShoppingList")) {
-                        Family.getInstance().getShoppingList().add(new FoodItem(null, addET.getEditText().getText().toString(), addNumberPicker.getValue(), currentUnit, null));
+                        Family.getInstance().addToShoppingList(new FoodItem(null, addET.getText().toString(), addNumberPicker.getValue(), currentUnit, null));
                         FirebaseManager.getInstance().setShoppingList(new FirebaseManager.FirebaseCallBack() {
                             @Override
                             public void onCallback(FirebaseManager.FirebaseResult result) {
+                                ShoppingList.mAdapter.notifyDataSetChanged();
+                                finish();
 
                             }
                         });
-                        ShoppingList.mAdapter.notifyDataSetChanged();
-                        finish();
-                    } else {
-                        Family.getInstance().getFoodList().parallelStream().forEach(foodItem -> {
-                            if (foodItem.getFoodDescription().equals(addET.getEditText().getText().toString())&&foodItem.getUnit().equals(currentUnit)) {
-                                foodItem.setAmount(foodItem.getAmount()+addNumberPicker.getValue());
-                                flag=true;
-                            }
-                        } );
-                        if(!flag) {
-                            Family.getInstance().getFoodList().add(new FoodItem(null, addET.getEditText().getText().toString(), addNumberPicker.getValue(), currentUnit, null));
-                        }
-                        flag=false;
+                    } else if(currentClass.equals("FoodStock")) {
+                        Family.getInstance().addToFoodList(new FoodItem(null, addET.getText().toString(), addNumberPicker.getValue(), currentUnit, null));
                         FirebaseManager.getInstance().setFoodList(new FirebaseManager.FirebaseCallBack() {
                             @Override
                             public void onCallback(FirebaseManager.FirebaseResult result) {
+                                FoodStock.mAdapter.notifyDataSetChanged();
+                                finish();
 
                             }
                         });
-                        FoodStock.mAdapter.notifyDataSetChanged();
-                        finish();
                     }
-                }else{
+                } else {
                     addET.setError("נדרש להשלים שם מוצר");
                 }
 

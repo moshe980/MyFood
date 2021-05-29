@@ -6,12 +6,13 @@
     <string name="search_recipe_title">חפשו מתכון</string>
     <string name="search_your_recipe">איזה מתכון תרצו לחפש?</string>
 
-    <string-array name="categories">
+    <string-array name="foods">
 
         <item>מלפפונים</item>
         <item>עגבניות</item>
         <item>בצל</item>
         <item>תפוחי עץ</item>
+        <item>בננות</item>
 
     </string-array>
     <string-array name="units">

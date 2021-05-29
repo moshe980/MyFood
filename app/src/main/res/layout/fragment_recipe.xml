@@ -158,50 +158,36 @@
                 android:textStyle="bold" />
         </androidx.cardview.widget.CardView>
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/add_to_shopping_list"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="20dp"
-            android:orientation="horizontal">
+            android:layout_marginEnd="5dp"
+            android:layout_weight="1"
+            android:text="הוסף רכיבים חסרים לרשימת הקניות"
+            android:textColor="#000000"
+            android:textStyle="bold"
+            android:layout_gravity="center"
+            app:backgroundTint="#FDD835"
+            app:cornerRadius="20dp"
+            app:icon="@drawable/ic_shopping_cart_black_24dp"
+            app:iconGravity="textStart" />
 
-            <ImageButton
-                android:id="@+id/recipe_movieBtn"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginEnd="5dp"
-                android:layout_weight="1"
-                android:background="#43A047"
-                android:src="@drawable/ic_ondemand_video_black_24dp" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/add_to_shopping_list"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="5dp"
-                android:layout_weight="1"
-                android:text="הוסף רכיבים חסרים לרשימת הקניות"
-                android:textColor="#000000"
-                android:textStyle="bold"
-                app:backgroundTint="#FDD835"
-                app:cornerRadius="20dp"
-                app:icon="@drawable/ic_shopping_cart_black_24dp"
-                app:iconGravity="textStart" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/complite_recipe"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="5dp"
-                android:layout_weight="1"
-                android:text="הכנתי את המתכון"
-                android:textStyle="bold"
-                app:backgroundTint="#7CB342"
-                app:cornerRadius="20dp"
-                app:icon="@drawable/ic_baseline_done_outline_24"
-                app:iconGravity="textStart" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/complite_recipe"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:text="הכנתי את המתכון"
+            android:textStyle="bold"
+            app:backgroundTint="#7CB342"
+            app:cornerRadius="20dp"
+            app:icon="@drawable/ic_baseline_done_outline_24"
+            app:iconGravity="textStart" />
 
 
-        </LinearLayout>
 
 
     </LinearLayout>

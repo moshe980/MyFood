@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,7 +22,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.myfood.Activity.RecipeMovie;
 import com.example.myfood.Adapter.FoodListAdapter;
 import com.example.myfood.Class.Family;
 import com.example.myfood.Class.FirebaseManager;
@@ -32,8 +30,6 @@ import com.example.myfood.Class.RecipeItem;
 import com.example.myfood.Class.RightJustifyAlertDialog;
 import com.example.myfood.R;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -43,7 +39,6 @@ import static com.example.myfood.Activity.Login.CHANNEL_1_ID;
 
 public class Recipe extends Fragment {
     private Button add_to_shopping_listBtn, complite_recipeBtn;
-    private ImageButton movieBtn;
     private ImageView recipeImage;
     private TextView recipeCategory;
     private TextView kashrot;
@@ -62,11 +57,8 @@ public class Recipe extends Fragment {
         final View view = inflater.inflate(R.layout.fragment_recipe, container, false);
 
         chosenRecipe = (RecipeItem) getArguments().getSerializable("chosenRecipe");
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
         add_to_shopping_listBtn = view.findViewById(R.id.add_to_shopping_list);
         complite_recipeBtn = view.findViewById(R.id.complite_recipe);
-        movieBtn = view.findViewById(R.id.recipe_movieBtn);
         recipeImage = view.findViewById(R.id.recipeImage);
         recipeCategory = view.findViewById(R.id.recipeCategory);
         kashrot = view.findViewById(R.id.kashrot);
@@ -151,13 +143,6 @@ public class Recipe extends Fragment {
         }
         recipeInstructions.setText(stringBuilder);
 
-        movieBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getContext(), RecipeMovie.class);
-                startActivity(intent);
-            }
-        });
         mAdapter.setOnItemClickListener(new FoodListAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position) {
@@ -219,12 +204,10 @@ public class Recipe extends Fragment {
         add_to_shopping_listBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-
-
                 for (int i = 0; i < unIngredientsList.size(); i++) {
                     unIngredientsList.get(i).setAvailable(0);
                 }
+                Family.getInstance().addAllToShoppingList(unIngredientsList);
                 FirebaseManager.getInstance().setShoppingList(new FirebaseManager.FirebaseCallBack() {
                     @Override
                     public void onCallback(FirebaseManager.FirebaseResult result) {

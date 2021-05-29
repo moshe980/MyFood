@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class FoodItem implements Serializable {
+public class  FoodItem implements Serializable {
     public final static int MILILITER = 1;
     public final static int LITER = 1000;
     public final static int GRAM = 1;
@@ -108,12 +108,16 @@ public class FoodItem implements Serializable {
     public int convertAmount() {
         switch (getUnit()) {
             case "גרם":
+                this.setUnit("גרם");
                 return GRAM;
             case "קילוגרם":
+                this.setUnit("גרם");
                 return KILOGRAM;
             case "ליטר":
+                this.setUnit("מ.ל");
                 return LITER;
             case "מ.ל":
+                this.setUnit("מ.ל");
                 return MILILITER;
             case "כוסות":
                 if (this.getFoodDescription().contains("קמח")) {
